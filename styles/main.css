@@ -1,0 +1,44 @@
+html, body {
+    background-color: rgb(25,25,25);
+    color: white;
+}
+
+#file_upload {
+    border: 5px solid blue;
+    width: 18em;
+    height: 1.5em;
+
+    font-size: 1.5em;
+    text-align: center;
+}
+
+td {
+    width: 10em;
+    text-align: center;
+}
+
+table, tr, td {
+    border-collapse: collapse;
+    border: 3px solid black;
+}
+
+tr:hover {
+    background-color: rgb(50,50,50);
+}
+
+tr.header {
+    font-weight: bold;
+}
+
+td.small_gap {
+    color: yellow;
+}
+
+td.medium_gap {
+    color: orange;
+}
+
+td.large_gap {
+    color: red;
+    font-weight: bold;
+}
