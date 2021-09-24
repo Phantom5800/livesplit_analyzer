@@ -12,6 +12,7 @@ const COL_CNT = 9;
 var SmallGapMs = 5000;
 var MediumGapMs = 10000;
 var LargeGapMs = 20000;
+var MillisecondAccuracy = 0;
 
 function analyzeSplits(event) {
     console.log("file dropped");
@@ -36,6 +37,11 @@ function onGapValueUpdate(gapId, value) {
     } else if (gapId === 2) {
         LargeGapMs = parseInt(value);
     }
+}
+
+function onAccuracyChange(value) {
+    MillisecondAccuracy = value;
+    console.log(value);
 }
 
 function toggleColumn(columnId, checkbox) {
@@ -176,12 +182,26 @@ function convertMsToTimeString(ms) {
     total_hours = total_hours - total_days * 24;
     total_minutes = total_minutes - total_hours * 60 - total_days * 24 * 60;
     total_seconds = total_seconds - total_hours * 3600 - total_minutes * 60 - total_days * 24 * 3600;
-    // TODO: option to display ms
+    
+    var total_ms = "";
+    if (MillisecondAccuracy > 0) {
+        milliseconds = ms - total_seconds * 1000 - total_minutes * 60 * 1000 - total_hours * 60 * 60 * 1000 - total_days * 24 * 60 * 60 * 1000;
+        milliseconds = Math.round(milliseconds / Math.pow(10, 3 - MillisecondAccuracy));
+        total_ms = ".";
+        if (milliseconds < 100) {
+            total_ms += "0";
+        }
+        if (milliseconds < 10) {
+            total_ms += "0";
+        }
+        total_ms += milliseconds;
+    }
     return (
         ((total_days > 0) ? total_days + "d " : "")
         + total_hours + ":" 
         + (total_minutes).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + ":" 
-        + (total_seconds).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})
+        + (total_seconds).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) 
+        + total_ms
     );
 }
 
@@ -230,7 +250,11 @@ function findDayOfAttempt(attemptTime) {
 function trimSegmentTime(time) {
     var decimalIndex = time.lastIndexOf('.');
     if (decimalIndex !== -1) {
-        return time.substr(0, decimalIndex);
+        var offset = 0;
+        if (MillisecondAccuracy > 0) {
+            offset = MillisecondAccuracy + 1;
+        }
+        return time.substr(0, decimalIndex + offset);
     } else {
         return time;
     }

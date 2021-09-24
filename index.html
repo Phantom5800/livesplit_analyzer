@@ -90,7 +90,24 @@
                                 <input type="checkbox" onchange="toggleColumn(8, this)" checked>Resets Before Finishing Split</input>
                             </td>
                         </tr>
+                        <tr>
+                            <td class="header">Subsecond Accuracy</td>
+                            <td style="text-align: left;">
+                                <select onchange="onAccuracyChange(this.selectedIndex)">
+                                    <option>None</option>
+                                    <option>Tenths</option>
+                                    <option>Hundredths</option>
+                                    <option>Thousandths</option>
+                                </select>
+                            </td>
+                            <td>How many digits to display for fractional seconds.</td>
+                        </tr>
                     </table>
+                    <ul>
+                        <li>
+                            Make sure to adjust settings before dropping in a splits file.
+                        </li>
+                    </ul>
                 </div>
             </div>
     
