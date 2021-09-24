@@ -116,7 +116,6 @@ function parseFile(file) {
         $("#category").html(categoryName);
 
         // fill out interesting data
-        $("#attempts").html(xmlDoc.getElementsByTagName("AttemptCount")[0].textContent);
         countAttempts(xmlDoc.getElementsByTagName("AttemptHistory")[0]);
 
         // parse splits
@@ -207,6 +206,8 @@ function convertMsToTimeString(ms) {
 
 function countAttempts(attemptHistory) {
     var completedRuns = 0;
+    //$("#attempts").html(xmlDoc.getElementsByTagName("AttemptCount")[0].textContent);
+    $("#attempts").html(attemptHistory.childElementCount);
     for (var i = 0; i < attemptHistory.childElementCount; ++i) {
         var attemptData = {};
         var attempt = attemptHistory.children[i];
@@ -216,11 +217,13 @@ function countAttempts(attemptHistory) {
         }
 
         try {
-            attemptData.startTime = convertStrToDate(attempt.attributes['started'].nodeValue);
-            attemptData.endTime = convertStrToDate(attempt.attributes['ended'].nodeValue);
-            attemptData.duration = attemptData.endTime - attemptData.startTime; // elapsed time in ms
+            if (attempt.attributes['started'] && attempt.attributes['ended']) {
+                attemptData.startTime = convertStrToDate(attempt.attributes['started'].nodeValue);
+                attemptData.endTime = convertStrToDate(attempt.attributes['ended'].nodeValue);
+                attemptData.duration = attemptData.endTime - attemptData.startTime; // elapsed time in ms
+            }
         } catch(error) {
-
+            console.log(error);
         }
         attemptDataTable.push(attemptData);
     }
