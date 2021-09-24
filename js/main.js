@@ -405,7 +405,11 @@ function parseSegments(segmentList) {
     }
 
     for (var i = 0; i < runsDeadAtSegment.length; ++i) {
-        $("#resets-" + i).html(runsDeadAtSegment[i]);
+        var count = runsDeadAtSegment[i];
+        if (count > 0) {
+            var percentage = Math.trunc(count / parseInt($("#attempts").html()) * 100)
+            $("#resets-" + i).html(count + " (" + percentage + "%)");
+        }
     }
 }
 
