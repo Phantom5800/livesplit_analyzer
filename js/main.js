@@ -241,6 +241,9 @@ function parseSegments(segmentList) {
     var currentPBTime = 0;
     var currentPBSplitTime = 0;
     segmentLifetimes.length = parseInt($("#attempts").html());
+    for (var i = 0; i < segmentLifetimes.length; ++i) {
+        segmentLifetimes[i] = 0;
+    }
 
     for (var i = 0; i < segmentList.length; ++i) {
         var row = document.createElement("tr");
@@ -260,7 +263,8 @@ function parseSegments(segmentList) {
             var timeNode = segmentHistory.children[k];
             var timeNodeId = parseInt(timeNode.attributes["id"].nodeValue) - 1;
 
-            segmentLifetimes[timeNodeId] = i; // update latest segment a run has been seen at
+            // update latest segment a run has been seen at
+            segmentLifetimes[timeNodeId] = i + 1; // treat 0 as having not finished a split, so offset by 1 for each completed split
 
             if (timeNode.children && timeNode.children.length > 0) {
                 var segmentTime = timeNode.children[0].textContent.trim();
@@ -400,8 +404,8 @@ function parseSegments(segmentList) {
         }
     }
 
-    for (var i = 1; i < runsDeadAtSegment.length; ++i) {
-        $("#resets-" + i).html(runsDeadAtSegment[i - 1]);
+    for (var i = 0; i < runsDeadAtSegment.length; ++i) {
+        $("#resets-" + i).html(runsDeadAtSegment[i]);
     }
 }
 
