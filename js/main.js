@@ -234,7 +234,9 @@ function countAttempts(attemptHistory) {
     // calculate total play time
     var totalPlayTime = 0;
     for (var i = 0; i < attemptDataTable.length; ++i) {
-        totalPlayTime += attemptDataTable[i].duration;
+        if (attemptDataTable[i].duration) {
+            totalPlayTime += attemptDataTable[i].duration;
+        }
     }
     $("#total_time").html(convertMsToTimeString(totalPlayTime));
 }
