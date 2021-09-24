@@ -6,6 +6,8 @@ const AVG_SEGMENT_TIME_COL = 4;
 const BEST_SEGMENT_TIME_COL = 5;
 const BEST_SEGMENT_DATE_COL = 6;
 const RUNS_ENDED_COL = 7;
+const RUNS_ENDED_BEFORE_COL = 8;
+const COL_CNT = 9;
 
 var SmallGapMs = 5000;
 var MediumGapMs = 10000;
@@ -83,12 +85,16 @@ function parseFile(file) {
                     }
                 }
             }
-            if (variableCnt > 0) {
+
+            var hasPlatform = platform && platform.trim().length > 0;
+            var hasRegion = region && region.trim().length > 0;
+
+            if (variableCnt > 0 && (hasPlatform || hasRegion)) {
                 categoryName += ", ";
             }
 
             // display platform
-            if (platform) {
+            if (hasPlatform) {
                 categoryName += platform;
                 if (region) {
                     categoryName += ", ";
@@ -96,7 +102,7 @@ function parseFile(file) {
             }
 
             // display region if specified
-            if (region) {
+            if (hasRegion) {
                 categoryName += region;
             }
             categoryName += ")";
@@ -284,7 +290,7 @@ function parseSegments(segmentList) {
         }
 
         // determine each column's values
-        for (var j = 0; j < 8; ++j) {
+        for (var j = 0; j < COL_CNT; ++j) {
             var col = document.createElement("td");
             col.className = "col-" + j;
 
@@ -372,6 +378,8 @@ function parseSegments(segmentList) {
                 col.innerHTML = bestTimeDate;
             } else if (j === RUNS_ENDED_COL) { // resets during this split
                 col.id = "resets-" + i;
+            } else if (j === RUNS_ENDED_BEFORE_COL) { // resets before or during this split
+                col.id = "resets-before-" + i;
             }
             row.appendChild(col);
         }
@@ -404,11 +412,16 @@ function parseSegments(segmentList) {
         }
     }
 
+    var totalDeaths = 0;
     for (var i = 0; i < runsDeadAtSegment.length; ++i) {
         var count = runsDeadAtSegment[i];
         if (count > 0) {
             var percentage = Math.trunc(count / parseInt($("#attempts").html()) * 100)
             $("#resets-" + i).html(count + " (" + percentage + "%)");
+            
+            totalDeaths += count;
+            var totalPercentage = Math.trunc(totalDeaths / parseInt($("#attempts").html()) * 100);
+            $("#resets-before-" + i).html(totalDeaths + " (" + totalPercentage + "%)");
         }
     }
 }
