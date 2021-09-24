@@ -26,6 +26,24 @@ function analyzeSplits(event) {
     event.preventDefault();
 }
 
+function onGapValueUpdate(gapId, value) {
+    if (gapId === 0) {
+        SmallGapMs = parseInt(value);
+    } else if (gapId === 1) {
+        MediumGapMs = parseInt(value);
+    } else if (gapId === 2) {
+        LargeGapMs = parseInt(value);
+    }
+}
+
+function toggleColumn(columnId, checkbox) {
+    if (checkbox.checked) {
+        $(".col-" + columnId).show();
+    } else {
+        $(".col-" + columnId).hide();
+    }
+}
+
 var attemptDataTable = [];
 var segmentLifetimes = [[]];
 
@@ -264,6 +282,7 @@ function parseSegments(segmentList) {
         // determine each column's values
         for (var j = 0; j < 8; ++j) {
             var col = document.createElement("td");
+            col.className = "col-" + j;
 
             if (j === SECTION_COL) { // section name
                 if (startOfSection === null) {
@@ -322,11 +341,11 @@ function parseSegments(segmentList) {
 
                     // set style based on difference from best
                     if (currentPBSegmentTime > bestMs + LargeGapMs) {
-                        col.className = "large_gap";
+                        col.className += " large_gap";
                     } else if (currentPBSegmentTime > bestMs + MediumGapMs) {
-                        col.className = "medium_gap";
+                        col.className += " medium_gap";
                     } else if (currentPBSegmentTime > bestMs + SmallGapMs) {
-                        col.className = "small_gap";
+                        col.className += " small_gap";
                     } 
 
                     col.innerHTML = convertMsToTimeString(currentPBSegmentTime);
@@ -337,11 +356,11 @@ function parseSegments(segmentList) {
 
                 // set style based on difference from best
                 if (currentAvg > bestMs + LargeGapMs) {
-                    col.className = "large_gap";
+                    col.className += " large_gap";
                 } else if (currentAvg > bestMs + MediumGapMs) {
-                    col.className = "medium_gap";
+                    col.className += " medium_gap";
                 } else if (currentAvg > bestMs + SmallGapMs) {
-                    col.className = "small_gap";
+                    col.className += " small_gap";
                 } 
             } else if (j === BEST_SEGMENT_TIME_COL) { // best segment time
                 col.innerHTML = trimSegmentTime(bestTime);

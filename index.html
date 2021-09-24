@@ -5,79 +5,125 @@
         <link rel="stylesheet" href="styles/main.css">
     </head>
     <body ondrop="analyzeSplits(event)" ondragover="preventDefaultDrag(event)">
-        <div id="file_upload">
-            Drag and drop your splits onto the page
+        <div id="content">
+            <h1 id="game">Game Title</h1>
+            <h2 id="category">Category</h2>
+    
+            <div class="flex_container">
+                <div class="flex_child">
+                    <h3>Overall Stats</h3>
+                    <table id="stats">
+                        <tr>
+                            <td class="header">PB Time</td>
+                            <td id="pb_time"></td>
+                        </tr>
+                        <tr>
+                            <td class="header">PB Date</td>
+                            <td id="pb_date"></td>
+                        </tr>
+                        <tr>
+                            <td class="header">Days Since PB</td>
+                            <td id="pb_offset"></td>
+                        </tr>
+                        <tr>
+                            <td class="header">Average Time</td>
+                            <td id="average_time"></td>
+                        </tr>
+                        <tr>
+                            <td class="header">Best Time</td>
+                            <td id="best_time"></td>
+                        </tr>
+                        <tr>
+                            <td class="header">Latest Time</td>
+                            <td id="last_finished_time"></td>
+                        </tr>
+                        <tr>
+                            <td class="header">Days Since Finished Run</td>
+                            <td id="finished_run_days"></td>
+                        </tr>
+                        <tr>
+                            <td class="header">Total Play Time</td>
+                            <td id="total_time"></td>
+                        </tr>
+                        <tr>
+                            <td class="header">Runs Completed</td>
+                            <td id="completed"></td>
+                        </tr>
+                        <tr>
+                            <td class="header">Runs Attempted</td>
+                            <td id="attempts"></td>
+                        </tr>
+                    </table>
+                </div>
+    
+                <div class="flex_child">
+                    <h3>Settings</h3>
+                    <table>
+                        <tr>
+                            <td class="header">Small Gap Time (ms)</td>
+                            <td><input type="number" value="5000" onchange="onGapValueUpdate(0, this.value)"></td>
+                            <td class="small_gap">Displayed like this</td>
+                        </tr>
+                        <tr>
+                            <td class="header">Medium Gap Time (ms)</td>
+                            <td><input type="number" value="10000" onchange="onGapValueUpdate(1, this.value)"></td>
+                            <td class="medium_gap">Displayed like this</td>
+                        </tr>
+                        <tr>
+                            <td class="header">Large Gap Time (ms)</td>
+                            <td><input type="number" value="20000" onchange="onGapValueUpdate(2, this.value)"></td>
+                            <td class="large_gap">Displayed like this</td>
+                        </tr>
+                        <tr>
+                            <td class="header">Visible Columns</td>
+                            <td style="text-align: left;">
+                                <input type="checkbox" onchange="toggleColumn(0, this)" checked>Section</input><br/>
+                                <input type="checkbox" onchange="toggleColumn(1, this)" checked>Split Name</input><br/>
+                                <input type="checkbox" onchange="toggleColumn(2, this)" checked>PB Split Time</input><br/>
+                                <input type="checkbox" onchange="toggleColumn(3, this)" checked>PB Segment Time</input><br/>
+                            </td>
+                            <td style="text-align: left;">
+                                <input type="checkbox" onchange="toggleColumn(4, this)" checked>Avg Segment Time</input><br/>
+                                <input type="checkbox" onchange="toggleColumn(5, this)" checked>Best Segment Time</input><br/>
+                                <input type="checkbox" onchange="toggleColumn(6, this)" checked>Best Segment Date</input><br/>
+                                <input type="checkbox" onchange="toggleColumn(7, this)" checked>Runs That End During This Split</input>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+    
+            <div style="padding-top: 1em;"></div>
+    
+            <div>           
+                <table id="splits_table">
+                    <tr id="splits_header" class="header">
+                        <td class="col-0">Section</td>
+                        <td class="col-1">Split Name</td>
+                        <td class="col-2">PB Split Time</td>
+                        <td class="col-3">PB Segment Time</td>
+                        <td class="col-4">Average Segment Time</td>
+                        <td class="col-5">Best Segment Time</td>
+                        <td class="col-6">Best Segment Time Date</td>
+                        <td class="col-7">Runs That End During This Split</td>
+                    </tr>
+                </table>
+            </body>
+            </div>
+    
+            <div style="padding-top: 1em; padding-bottom: 1em;">
+                <ul>
+                    <li>
+                        Average times are calculated as a mean average of all available times for a split.
+                    </li>
+                    <li>
+                        Source code for this page can be found at: <a href="https://github.com/Phantom5800/livesplit_analyzer" target="_blank">https://github.com/Phantom5800/livesplit_analyzer</a>
+                    </li>
+                </ul>
+            </div>
+            <div id="file_upload">
+                Drag and drop your splits onto the page
+            </div>
         </div>
-
-        <h1 id="game">Game Title</h1>
-        <h2 id="category">Category</h2>
-
-        <div style="padding-top: 1em;"></div>
-
-        <div>
-            <table id="stats">
-                <tr>
-                    <td>PB Time</td>
-                    <td id="pb_time"></td>
-                </tr>
-                <tr>
-                    <td>PB Date</td>
-                    <td id="pb_date"></td>
-                </tr>
-                <tr>
-                    <td>Days Since PB</td>
-                    <td id="pb_offset"></td>
-                </tr>
-                <tr>
-                    <td>Average Time</td>
-                    <td id="average_time"></td>
-                </tr>
-                <tr>
-                    <td>Best Time</td>
-                    <td id="best_time"></td>
-                </tr>
-                <tr>
-                    <td>Latest Time</td>
-                    <td id="last_finished_time"></td>
-                </tr>
-                <tr>
-                    <td>Days Since Finished Run</td>
-                    <td id="finished_run_days"></td>
-                </tr>
-                <tr>
-                    <td>Total Play Time</td>
-                    <td id="total_time"></td>
-                </tr>
-                <tr>
-                    <td>Runs Completed</td>
-                    <td id="completed"></td>
-                </tr>
-                <tr>
-                    <td>Runs Attempted</td>
-                    <td id="attempts"></td>
-                </tr>
-            </table>
-        </div>
-
-        <div style="padding-top: 1em;"></div>
-
-        <div>           
-            <table id="splits_table">
-                <tr id="splits_header" class="header">
-                    <td>Section</td>
-                    <td>Split Name</td>
-                    <td>PB Split Time</td>
-                    <td>PB Segment Time</td>
-                    <td>Average Segment Time</td>
-                    <td>Best Segment Time</td>
-                    <td>Best Segment Time Date</td>
-                    <td>Runs That End During This Split</td>
-                </tr>
-            </table>
-        </body>
-        </div>
-
-        <div style="padding-top: 1em;">
-            * Average times are calculated as a mean average of all available times for a split.
-        </div>
+    </body>
 </html>
