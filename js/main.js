@@ -69,6 +69,15 @@ function toggleColumn(columnId, checkbox) {
     }
 }
 
+// method for forcing existing column visibility after parsing is complete
+function correctColumnVisibilities() {
+    for (var i = 0; i < COL_CNT; ++i) {
+        if (localStorage.getItem("col-visibility-" + i) !== "true") {
+            $(".col-" + i).hide();
+        }
+    }
+}
+
 var attemptDataTable = [];
 var segmentLifetimes = [[]];
 
@@ -474,6 +483,8 @@ function parseSegments(segmentList) {
             $("#resets-before-" + i).html(totalDeaths + " (" + totalPercentage + "%)");
         }
     }
+
+    correctColumnVisibilities();
 }
 
 function preventDefaultDrag(event) {
