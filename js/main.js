@@ -456,11 +456,11 @@ function parseSegments(segmentList) {
     for (var i = 0; i < runsDeadAtSegment.length; ++i) {
         var count = runsDeadAtSegment[i];
         if (count > 0) {
-            var percentage = Math.trunc(count / parseInt($("#attempts").html()) * 100 * Math.pow(10, MillisecondAccuracy)) / Math.pow(10, MillisecondAccuracy)
+            var percentage = Math.round(count / parseInt($("#attempts").html()) * 100 * Math.pow(10, MillisecondAccuracy)) / Math.pow(10, MillisecondAccuracy)
             $("#resets-" + i).html(count + " (" + percentage + "%)");
             
             totalDeaths += count;
-            var totalPercentage = Math.trunc(totalDeaths / parseInt($("#attempts").html()) * 100 * Math.pow(10, MillisecondAccuracy)) / Math.pow(10, MillisecondAccuracy);
+            var totalPercentage = Math.round(totalDeaths / parseInt($("#attempts").html()) * 100 * Math.pow(10, MillisecondAccuracy)) / Math.pow(10, MillisecondAccuracy);
             $("#resets-before-" + i).html(totalDeaths + " (" + totalPercentage + "%)");
         }
     }
