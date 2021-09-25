@@ -34,30 +34,38 @@ function analyzeSplits(event) {
 function onGapValueUpdate(gapId, value) {
     if (gapId === 0) {
         SmallGapMs = parseInt(value);
+        localStorage.setItem("small_gap_time", SmallGapMs);
     } else if (gapId === 1) {
         MediumGapMs = parseInt(value);
+        localStorage.setItem("medium_gap_time", MediumGapMs);
     } else if (gapId === 2) {
         LargeGapMs = parseInt(value);
+        localStorage.setItem("large_gap_time", LargeGapMs);
     }
 }
 
 function onMsAccuracyChange(value) {
     MillisecondAccuracy = value;
+    localStorage.setItem("msAccuracy", value);
 }
 
 function onPercentAccuracyChange(value) {
     PercentageAccuracy = value;
+    localStorage.setItem("percentAccuracy", value);
 }
 
 function onTimingModeChange(value) {
     TimingMode = value;
+    localStorage.setItem("timing_mode", value);
 }
 
 function toggleColumn(columnId, checkbox) {
     if (checkbox.checked) {
         $(".col-" + columnId).show();
+        localStorage.setItem("col-visibility-" + columnId, "true");
     } else {
         $(".col-" + columnId).hide();
+        localStorage.setItem("col-visibility-" + columnId, "false");
     }
 }
 
@@ -471,3 +479,27 @@ function parseSegments(segmentList) {
 function preventDefaultDrag(event) {
     event.preventDefault();
 }
+
+// load local storage settings on page load if they exist
+$(document).ready(function() {
+    function localStorageGetWithDefault(key, defaultValue) {
+        const value = localStorage.getItem(key);
+        if (!value) {
+            localStorage.setItem(key, defaultValue);
+            return defaultValue;
+        }
+        return value;
+    }
+
+    $("#timing_mode").val(localStorageGetWithDefault("timing_mode", TimingMode)).change();
+    $("#msAccuracy").prop("selectedIndex", parseInt(localStorageGetWithDefault("msAccuracy", MillisecondAccuracy))).change();
+    $("#percentAccuracy").prop("selectedIndex", parseInt(localStorageGetWithDefault("percentAccuracy", PercentageAccuracy))).change();
+
+    $("#small_gap_time").val(parseInt(localStorageGetWithDefault("small_gap_time", SmallGapMs))).change();
+    $("#medium_gap_time").val(parseInt(localStorageGetWithDefault("medium_gap_time", MediumGapMs))).change();
+    $("#large_gap_time").val(parseInt(localStorageGetWithDefault("large_gap_time", LargeGapMs))).change();
+
+    for (var i = 0; i < COL_CNT; ++i) {
+        $("#col-visibility-" + i).prop("checked", localStorageGetWithDefault("col-visibility-" + i, "true") === "true").change();
+    }
+});

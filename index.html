@@ -63,7 +63,7 @@
                         <tr>
                             <td class="header">Timing Mode</td>
                             <td>
-                                <select onchange="onTimingModeChange(this.value)">
+                                <select id="timing_mode" onchange="onTimingModeChange(this.value)">
                                     <option>RealTime</option>
                                     <option>GameTime</option>
                                 </select>
@@ -72,39 +72,39 @@
                         </tr>
                         <tr>
                             <td class="header">Small Gap Time (ms)</td>
-                            <td><input type="number" value="5000" onchange="onGapValueUpdate(0, this.value)"></td>
+                            <td><input id="small_gap_time" type="number" value="5000" onchange="onGapValueUpdate(0, this.value)"></td>
                             <td class="small_gap">Displayed like this</td>
                         </tr>
                         <tr>
                             <td class="header">Medium Gap Time (ms)</td>
-                            <td><input type="number" value="10000" onchange="onGapValueUpdate(1, this.value)"></td>
+                            <td><input id="medium_gap_time" type="number" value="10000" onchange="onGapValueUpdate(1, this.value)"></td>
                             <td class="medium_gap">Displayed like this</td>
                         </tr>
                         <tr>
                             <td class="header">Large Gap Time (ms)</td>
-                            <td><input type="number" value="20000" onchange="onGapValueUpdate(2, this.value)"></td>
+                            <td><input id="large_gap_time" type="number" value="20000" onchange="onGapValueUpdate(2, this.value)"></td>
                             <td class="large_gap">Displayed like this</td>
                         </tr>
                         <tr>
                             <td class="header">Visible Columns</td>
                             <td style="text-align: left;">
-                                <input type="checkbox" onchange="toggleColumn(0, this)" checked>Section</input><br/>
-                                <input type="checkbox" onchange="toggleColumn(1, this)" checked>Split Name</input><br/>
-                                <input type="checkbox" onchange="toggleColumn(2, this)" checked>PB Split Time</input><br/>
-                                <input type="checkbox" onchange="toggleColumn(3, this)" checked>PB Segment Time</input><br/>
-                                <input type="checkbox" onchange="toggleColumn(4, this)" checked>Avg Segment Time</input><br/>
+                                <input id="col-visibility-0" type="checkbox" onchange="toggleColumn(0, this)" checked>Section</input><br/>
+                                <input id="col-visibility-1" type="checkbox" onchange="toggleColumn(1, this)" checked>Split Name</input><br/>
+                                <input id="col-visibility-2" type="checkbox" onchange="toggleColumn(2, this)" checked>PB Split Time</input><br/>
+                                <input id="col-visibility-3" type="checkbox" onchange="toggleColumn(3, this)" checked>PB Segment Time</input><br/>
+                                <input id="col-visibility-4" type="checkbox" onchange="toggleColumn(4, this)" checked>Avg Segment Time</input><br/>
                             </td>
                             <td style="text-align: left;">
-                                <input type="checkbox" onchange="toggleColumn(5, this)" checked>Best Segment Time</input><br/>
-                                <input type="checkbox" onchange="toggleColumn(6, this)" checked>Best Segment Date</input><br/>
-                                <input type="checkbox" onchange="toggleColumn(7, this)" checked>Resets During This Split</input><br/>
-                                <input type="checkbox" onchange="toggleColumn(8, this)" checked>Resets Before Finishing Split</input>
+                                <input id="col-visibility-5" type="checkbox" onchange="toggleColumn(5, this)" checked>Best Segment Time</input><br/>
+                                <input id="col-visibility-6" type="checkbox" onchange="toggleColumn(6, this)" checked>Best Segment Date</input><br/>
+                                <input id="col-visibility-7" type="checkbox" onchange="toggleColumn(7, this)" checked>Resets During This Split</input><br/>
+                                <input id="col-visibility-8" type="checkbox" onchange="toggleColumn(8, this)" checked>Resets Before Finishing Split</input>
                             </td>
                         </tr>
                         <tr>
                             <td class="header">Subsecond Accuracy</td>
                             <td style="text-align: left;">
-                                <select onchange="onMsAccuracyChange(this.selectedIndex)">
+                                <select id="msAccuracy" onchange="onMsAccuracyChange(this.selectedIndex)">
                                     <option>None</option>
                                     <option>Tenths</option>
                                     <option>Hundredths</option>
@@ -116,7 +116,7 @@
                         <tr>
                             <td class="header">Percentage Accuracy</td>
                             <td>
-                                <select onchange="onPercentAccuracyChange(this.selectedIndex)">
+                                <select id="percentAccuracy" onchange="onPercentAccuracyChange(this.selectedIndex)">
                                     <option>None</option>
                                     <option>Tenths</option>
                                     <option>Hundredths</option>
