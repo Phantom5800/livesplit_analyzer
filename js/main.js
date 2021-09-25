@@ -192,10 +192,10 @@ function convertMsToTimeString(ms) {
         milliseconds = ms - total_seconds * 1000 - total_minutes * 60 * 1000 - total_hours * 60 * 60 * 1000 - total_days * 24 * 60 * 60 * 1000;
         milliseconds = Math.round(milliseconds / Math.pow(10, 3 - MillisecondAccuracy));
         total_ms = ".";
-        if (milliseconds < 100) {
+        if (milliseconds < 100 && MillisecondAccuracy > 2) {
             total_ms += "0";
         }
-        if (milliseconds < 10) {
+        if (milliseconds < 10 && MillisecondAccuracy > 1) {
             total_ms += "0";
         }
         total_ms += milliseconds;
@@ -456,11 +456,11 @@ function parseSegments(segmentList) {
     for (var i = 0; i < runsDeadAtSegment.length; ++i) {
         var count = runsDeadAtSegment[i];
         if (count > 0) {
-            var percentage = Math.trunc(count / parseInt($("#attempts").html()) * 100)
+            var percentage = Math.trunc(count / parseInt($("#attempts").html()) * 100 * Math.pow(10, MillisecondAccuracy)) / Math.pow(10, MillisecondAccuracy)
             $("#resets-" + i).html(count + " (" + percentage + "%)");
             
             totalDeaths += count;
-            var totalPercentage = Math.trunc(totalDeaths / parseInt($("#attempts").html()) * 100);
+            var totalPercentage = Math.trunc(totalDeaths / parseInt($("#attempts").html()) * 100 * Math.pow(10, MillisecondAccuracy)) / Math.pow(10, MillisecondAccuracy);
             $("#resets-before-" + i).html(totalDeaths + " (" + totalPercentage + "%)");
         }
     }
