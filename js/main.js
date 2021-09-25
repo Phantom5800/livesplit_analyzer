@@ -13,6 +13,7 @@ var SmallGapMs = 5000;
 var MediumGapMs = 10000;
 var LargeGapMs = 20000;
 var MillisecondAccuracy = 0;
+var TimingMode = "RealTime";
 
 function analyzeSplits(event) {
     console.log("file dropped");
@@ -42,6 +43,10 @@ function onGapValueUpdate(gapId, value) {
 function onAccuracyChange(value) {
     MillisecondAccuracy = value;
     console.log(value);
+}
+
+function onTimingModeChange(value) {
+    TimingMode = value;
 }
 
 function toggleColumn(columnId, checkbox) {
@@ -212,7 +217,10 @@ function countAttempts(attemptHistory) {
         var attemptData = {};
         var attempt = attemptHistory.children[i];
         if (attempt.children && attempt.children.length > 0) {
-            attemptData.finishTime = convertSegmentStrToMs(attempt.children[0].textContent);
+            var attemptTimeContainer = attempt.getElementsByTagName(TimingMode);
+            if (attemptTimeContainer && attemptTimeContainer.length > 0) {
+                attemptData.finishTime = convertSegmentStrToMs(attemptTimeContainer[0].textContent);
+            }
             ++completedRuns;
         }
 
@@ -285,7 +293,8 @@ function parseSegments(segmentList) {
         row.className = "split";
         var segment = segmentList[i];
 
-        var bestTime = segment.getElementsByTagName("BestSegmentTime")[0].textContent.trim();
+        var bestTimeContainer = segment.getElementsByTagName("BestSegmentTime")[0].getElementsByTagName(TimingMode);
+        var bestTime = (bestTimeContainer && bestTimeContainer.length > 0) ? bestTimeContainer[0].textContent.trim() : "00:00:00.000";
         var segmentHistory = segment.getElementsByTagName("SegmentHistory")[0];
 
         totalBestTime += convertSegmentStrToMs(bestTime);
@@ -302,7 +311,8 @@ function parseSegments(segmentList) {
             segmentLifetimes[timeNodeId] = i + 1; // treat 0 as having not finished a split, so offset by 1 for each completed split
 
             if (timeNode.children && timeNode.children.length > 0) {
-                var segmentTime = timeNode.children[0].textContent.trim();
+                var segmentTimeContainer = timeNode.getElementsByTagName(TimingMode);
+                var segmentTime = (segmentTimeContainer && segmentTimeContainer.length > 0) ? segmentTimeContainer[0].textContent.trim() : "00:00:00.000";
                 currentAvg += convertSegmentStrToMs(segmentTime);
                 ++avgCnt;
 
@@ -354,7 +364,8 @@ function parseSegments(segmentList) {
                 for (var k = 0; k < splitTimes.childElementCount; ++k) {
                     if (splitTimes.children[k].attributes["name"].nodeValue === "Personal Best") {
                         if (splitTimes.children[k].childElementCount > 0) {
-                            var fullTime = splitTimes.children[k].children[0].textContent;
+                            var fullTimeContainer = splitTimes.children[k].getElementsByTagName(TimingMode);
+                            var fullTime = (fullTimeContainer && fullTimeContainer.length > 0) ? fullTimeContainer[0].textContent : "00:00:00.000";
                             currentPBTime = currentPBSplitTime;
                             currentPBSplitTime = convertSegmentStrToMs(fullTime);
                             col.innerHTML = trimSegmentTime(fullTime);

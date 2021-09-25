@@ -1,5 +1,6 @@
 <html>
     <head>
+        <title>Livesplit Analyzer</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
         <script src="js/main.js"></script>
         <link rel="stylesheet" href="styles/main.css">
@@ -59,6 +60,16 @@
                 <div class="flex_child">
                     <h3>Settings</h3>
                     <table>
+                        <tr>
+                            <td class="header">Timing Mode</td>
+                            <td>
+                                <select onchange="onTimingModeChange(this.value)">
+                                    <option>RealTime</option>
+                                    <option>GameTime</option>
+                                </select>
+                            </td>
+                            <td>Time comparison to display in the generated table.</td>
+                        </tr>
                         <tr>
                             <td class="header">Small Gap Time (ms)</td>
                             <td><input type="number" value="5000" onchange="onGapValueUpdate(0, this.value)"></td>
@@ -140,6 +151,9 @@
                     </li>
                     <li>
                         Attempt count may appear differently than in Livesplit if you have ever cleared your split history, or for other mysterious reasons still unknown.
+                    </li>
+                    <li>
+                        In cases where a split was skipped, and a reset happened in the next split, the reset will be attributed to the split that was skipped. There's really no way to know in that case.
                     </li>
                     <li>
                         Source code for this page can be found at: <a href="https://github.com/Phantom5800/livesplit_analyzer" target="_blank">https://github.com/Phantom5800/livesplit_analyzer</a>
