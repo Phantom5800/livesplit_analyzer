@@ -104,7 +104,7 @@
                         <tr>
                             <td class="header">Subsecond Accuracy</td>
                             <td style="text-align: left;">
-                                <select onchange="onAccuracyChange(this.selectedIndex)">
+                                <select onchange="onMsAccuracyChange(this.selectedIndex)">
                                     <option>None</option>
                                     <option>Tenths</option>
                                     <option>Hundredths</option>
@@ -112,6 +112,18 @@
                                 </select>
                             </td>
                             <td>How many digits to display for fractional seconds.</td>
+                        </tr>
+                        <tr>
+                            <td class="header">Percentage Accuracy</td>
+                            <td>
+                                <select onchange="onPercentAccuracyChange(this.selectedIndex)">
+                                    <option>None</option>
+                                    <option>Tenths</option>
+                                    <option>Hundredths</option>
+                                    <option>Thousandths</option>
+                                </select>
+                            </td>
+                            <td>How many digits of accuracy to display for percentages.</td>
                         </tr>
                     </table>
                     <ul>

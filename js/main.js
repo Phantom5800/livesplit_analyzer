@@ -13,6 +13,7 @@ var SmallGapMs = 5000;
 var MediumGapMs = 10000;
 var LargeGapMs = 20000;
 var MillisecondAccuracy = 0;
+var PercentageAccuracy = 0;
 var TimingMode = "RealTime";
 
 function analyzeSplits(event) {
@@ -40,9 +41,12 @@ function onGapValueUpdate(gapId, value) {
     }
 }
 
-function onAccuracyChange(value) {
+function onMsAccuracyChange(value) {
     MillisecondAccuracy = value;
-    console.log(value);
+}
+
+function onPercentAccuracyChange(value) {
+    PercentageAccuracy = value;
 }
 
 function onTimingModeChange(value) {
@@ -61,8 +65,6 @@ var attemptDataTable = [];
 var segmentLifetimes = [[]];
 
 function parseFile(file) {
-    console.log("Reading " + file);
-
     // clear out any previous data
     attemptDataTable = [];
     segmentLifetimes = [[]];
@@ -236,7 +238,7 @@ function countAttempts(attemptHistory) {
         attemptDataTable.push(attemptData);
     }
     var attemptCount = parseInt($("#attempts").html());
-    var completedPercent = Math.trunc(completedRuns / attemptCount * 100);
+    var completedPercent = Math.trunc(completedRuns / attemptCount * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy);
     $("#completed").html(completedRuns + " (" + completedPercent + "%)");
 
     // calculate total play time
@@ -456,11 +458,11 @@ function parseSegments(segmentList) {
     for (var i = 0; i < runsDeadAtSegment.length; ++i) {
         var count = runsDeadAtSegment[i];
         if (count > 0) {
-            var percentage = Math.round(count / parseInt($("#attempts").html()) * 100 * Math.pow(10, MillisecondAccuracy)) / Math.pow(10, MillisecondAccuracy)
+            var percentage = Math.round(count / parseInt($("#attempts").html()) * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy)
             $("#resets-" + i).html(count + " (" + percentage + "%)");
             
             totalDeaths += count;
-            var totalPercentage = Math.round(totalDeaths / parseInt($("#attempts").html()) * 100 * Math.pow(10, MillisecondAccuracy)) / Math.pow(10, MillisecondAccuracy);
+            var totalPercentage = Math.round(totalDeaths / parseInt($("#attempts").html()) * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy);
             $("#resets-before-" + i).html(totalDeaths + " (" + totalPercentage + "%)");
         }
     }
