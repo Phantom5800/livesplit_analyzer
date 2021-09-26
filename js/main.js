@@ -1,13 +1,14 @@
-const SECTION_COL = 0;
-const SPLIT_NAME_COL = 1;
-const PB_SPLIT_TIME_COL = 2;
-const PB_SEGMENT_TIME_COL = 3;
-const AVG_SEGMENT_TIME_COL = 4;
-const BEST_SEGMENT_TIME_COL = 5;
-const BEST_SEGMENT_DATE_COL = 6;
-const RUNS_ENDED_COL = 7;
-const RUNS_ENDED_BEFORE_COL = 8;
-const COL_CNT = 9;
+const INCLUDE_IN_TIMESAVE_COL = 0;
+const SECTION_COL = 1;
+const SPLIT_NAME_COL = 2;
+const PB_SPLIT_TIME_COL = 3;
+const PB_SEGMENT_TIME_COL = 4;
+const AVG_SEGMENT_TIME_COL = 5;
+const BEST_SEGMENT_TIME_COL = 6;
+const BEST_SEGMENT_DATE_COL = 7;
+const RUNS_ENDED_COL = 8;
+const RUNS_ENDED_BEFORE_COL = 9;
+const COL_CNT = 10;
 
 var SmallGapMs = 5000;
 var MediumGapMs = 10000;
@@ -15,6 +16,7 @@ var LargeGapMs = 20000;
 var MillisecondAccuracy = 0;
 var PercentageAccuracy = 0;
 var TimingMode = "RealTime";
+var AllSplitsSelected = false;
 
 function analyzeSplits(event) {
     console.log("file dropped");
@@ -57,6 +59,43 @@ function onPercentAccuracyChange(value) {
 function onTimingModeChange(value) {
     TimingMode = value;
     localStorage.setItem("timing_mode", value);
+}
+
+function selectAllToggle(value) {
+    AllSplitsSelected = value;
+    localStorage.setItem("allSplitsSelected", AllSplitsSelected);
+
+    $("input[id^='include-']").prop("checked", value);
+    $("#include-0").change();
+}
+
+function updateTimesave(segmentCount) {
+    var totalTimesave = 0;
+    var selectedTimesave = 0;
+    var selectedCount = 0;
+
+    for (var i = 0; i < segmentCount; ++i) {
+        var pb_time = convertSegmentStrToMs($("#pb-segment-" + i).html());
+        var best_time = convertSegmentStrToMs($("#best-segment-" + i).html());
+        var includeThisTime = document.getElementById("include-" + i).checked;
+        if (includeThisTime) {
+            ++selectedCount;
+            selectedTimesave += (pb_time - best_time);
+        }
+        totalTimesave += (pb_time - best_time);
+    }
+
+    if (selectedCount === 0 || selectedCount === segmentCount) {
+        $("#timesave").html(convertMsToTimeString(totalTimesave) + " (Across all splits)");
+    } else {
+        $("#timesave").html(convertMsToTimeString(selectedTimesave) 
+            + " (Across " 
+            + selectedCount 
+            + " split" 
+            + ((selectedCount > 1) ? "s" : "")
+            + ")"
+        );
+    }
 }
 
 function toggleColumn(columnId, checkbox) {
@@ -356,7 +395,17 @@ function parseSegments(segmentList) {
             var col = document.createElement("td");
             col.className = "col-" + j;
 
-            if (j === SECTION_COL) { // section name
+            if (j === INCLUDE_IN_TIMESAVE_COL) {
+                var checkbox = document.createElement("input");
+                checkbox.id = "include-" + i;
+                checkbox.type = "checkbox";
+                checkbox.checked = AllSplitsSelected;
+                checkbox.onchange = function() {
+                    updateTimesave(segmentList.length);
+                }
+                col.appendChild(checkbox);
+                col.style.width = "2em";
+            } else if (j === SECTION_COL) { // section name
                 if (startOfSection === null) {
                     startOfSection = col;
                 }
@@ -408,6 +457,7 @@ function parseSegments(segmentList) {
                     }
                 }
             } else if (j === PB_SEGMENT_TIME_COL) { // pb segment time
+                col.id = "pb-segment-" + i;
                 var currentPBSegmentTime = currentPBSplitTime - currentPBTime;
                 if (currentPBSegmentTime > 0) {
                     var bestMs = convertSegmentStrToMs(bestTime);
@@ -436,6 +486,7 @@ function parseSegments(segmentList) {
                     col.className += " small_gap";
                 } 
             } else if (j === BEST_SEGMENT_TIME_COL) { // best segment time
+                col.id = "best-segment-" + i;
                 col.innerHTML = trimSegmentTime(bestTime);
             } else if (j === BEST_SEGMENT_DATE_COL) { // best segment time date
                 col.innerHTML = bestTimeDate;
@@ -489,6 +540,7 @@ function parseSegments(segmentList) {
     }
 
     correctColumnVisibilities();
+    updateTimesave(segmentList.length);
 }
 
 function preventDefaultDrag(event) {
@@ -517,4 +569,6 @@ $(document).ready(function() {
     for (var i = 0; i < COL_CNT; ++i) {
         $("#col-visibility-" + i).prop("checked", localStorageGetWithDefault("col-visibility-" + i, "true") === "true").change();
     }
+
+    $("#allSplitsSelected").prop("checked", localStorageGetWithDefault("allSplitsSelected", "false") === "true").change();
 });

@@ -54,6 +54,10 @@
                             <td class="header">Runs Attempted</td>
                             <td id="attempts"></td>
                         </tr>
+                        <tr>
+                            <td class="header">Possible Timesave</td>
+                            <td id="timesave"></td>
+                        </tr>
                     </table>
                 </div>
     
@@ -88,17 +92,17 @@
                         <tr>
                             <td class="header">Visible Columns</td>
                             <td style="text-align: left;">
-                                <input id="col-visibility-0" type="checkbox" onchange="toggleColumn(0, this)" checked>Section</input><br/>
-                                <input id="col-visibility-1" type="checkbox" onchange="toggleColumn(1, this)" checked>Split Name</input><br/>
-                                <input id="col-visibility-2" type="checkbox" onchange="toggleColumn(2, this)" checked>PB Split Time</input><br/>
-                                <input id="col-visibility-3" type="checkbox" onchange="toggleColumn(3, this)" checked>PB Segment Time</input><br/>
-                                <input id="col-visibility-4" type="checkbox" onchange="toggleColumn(4, this)" checked>Avg Segment Time</input><br/>
+                                <input id="col-visibility-1" type="checkbox" onchange="toggleColumn(1, this)" checked>Section</input><br/>
+                                <input id="col-visibility-2" type="checkbox" onchange="toggleColumn(2, this)" checked>Split Name</input><br/>
+                                <input id="col-visibility-3" type="checkbox" onchange="toggleColumn(3, this)" checked>PB Split Time</input><br/>
+                                <input id="col-visibility-4" type="checkbox" onchange="toggleColumn(4, this)" checked>PB Segment Time</input><br/>
+                                <input id="col-visibility-5" type="checkbox" onchange="toggleColumn(5, this)" checked>Avg Segment Time</input><br/>
                             </td>
                             <td style="text-align: left;">
-                                <input id="col-visibility-5" type="checkbox" onchange="toggleColumn(5, this)" checked>Best Segment Time</input><br/>
-                                <input id="col-visibility-6" type="checkbox" onchange="toggleColumn(6, this)" checked>Best Segment Date</input><br/>
-                                <input id="col-visibility-7" type="checkbox" onchange="toggleColumn(7, this)" checked>Resets During This Split</input><br/>
-                                <input id="col-visibility-8" type="checkbox" onchange="toggleColumn(8, this)" checked>Resets Before Finishing Split</input>
+                                <input id="col-visibility-6" type="checkbox" onchange="toggleColumn(6, this)" checked>Best Segment Time</input><br/>
+                                <input id="col-visibility-7" type="checkbox" onchange="toggleColumn(7, this)" checked>Best Segment Date</input><br/>
+                                <input id="col-visibility-8" type="checkbox" onchange="toggleColumn(8, this)" checked>Resets During This Split</input><br/>
+                                <input id="col-visibility-9" type="checkbox" onchange="toggleColumn(9, this)" checked>Resets Before Finishing Split</input>
                             </td>
                         </tr>
                         <tr>
@@ -139,15 +143,18 @@
             <div>           
                 <table id="splits_table">
                     <tr id="splits_header" class="header">
-                        <td class="col-0">Section</td>
-                        <td class="col-1">Split Name</td>
-                        <td class="col-2">PB Split Time</td>
-                        <td class="col-3">PB Segment Time</td>
-                        <td class="col-4">Average Segment Time</td>
-                        <td class="col-5">Best Segment Time</td>
-                        <td class="col-6">Best Segment Time Date</td>
-                        <td class="col-7">Resets During This Split</td>
-                        <td class="col-8">Resets Before Finishing This Split</td>
+                        <td style="width: 2em;">
+                            <input id="allSplitsSelected" type="checkbox" onchange="selectAllToggle(this.checked)">
+                        </td>
+                        <td class="col-1">Section</td>
+                        <td class="col-2">Split Name</td>
+                        <td class="col-3">PB Split Time</td>
+                        <td class="col-4">PB Segment Time</td>
+                        <td class="col-5">Average Segment Time</td>
+                        <td class="col-6">Best Segment Time</td>
+                        <td class="col-7">Best Segment Time Date</td>
+                        <td class="col-8">Resets During This Split</td>
+                        <td class="col-9">Resets Before Finishing This Split</td>
                     </tr>
                 </table>
             </body>
