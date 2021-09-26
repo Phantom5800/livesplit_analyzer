@@ -365,12 +365,12 @@ function parseSegments(segmentList) {
         for (var k = 0; k < segmentHistory.childElementCount; ++k) {
             var timeNode = segmentHistory.children[k]; // time information about segment attempt
             var timeNodeId = parseInt(timeNode.attributes["id"].nodeValue) - 1; // attemptId for this segment time
-
-            // update latest segment a run has been seen at
-            var hasPreviousSegment = segmentLifetimes[timeNodeId] === i; // check if the current attempt skipped the previous split
             
             if (timeNode.children && timeNode.children.length > 0) {
+                // update latest segment a run has been seen at
+                var hasPreviousSegment = segmentLifetimes[timeNodeId] === i; // check if the current attempt skipped the previous split
                 segmentLifetimes[timeNodeId] = i + 1; // treat 0 as having not finished a split, so offset by 1 for each completed split
+
                 var segmentTimeContainer = timeNode.getElementsByTagName(TimingMode); // get GameTime vs RealTime
                 var segmentTime = (segmentTimeContainer && segmentTimeContainer.length > 0) ? segmentTimeContainer[0].textContent.trim() : "00:00:00.000";
                 if (hasPreviousSegment) { // only include a time if the previous segment was not skipped
