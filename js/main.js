@@ -338,7 +338,11 @@ function parseSegments(segmentList) {
                 // found date best time was recorded
                 if (segmentTime === bestTime) {
                     var attemptId = parseInt(timeNode.attributes["id"].nodeValue) - 1;
-                    bestTimeDate = attemptDataTable[attemptId].endTime.toLocaleString("en-US", {"dateStyle": "short"});
+                    if (attemptId >= 0) {
+                        bestTimeDate = attemptDataTable[attemptId].endTime.toLocaleString("en-US", {"dateStyle": "short"});
+                    } else {
+                        bestTimeDate = "Manual or Deleted";
+                    }
                 }
             }
         }
