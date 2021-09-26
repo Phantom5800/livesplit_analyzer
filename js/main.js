@@ -16,6 +16,8 @@ var LargeGapMs = 20000;
 var MillisecondAccuracy = 0;
 var PercentageAccuracy = 0;
 var TimingMode = "RealTime";
+var RemoveOutliers = false;
+const SplitOutlierThreshold = 2; // exclude times greater than avg * this value when RemoveOutliers is enabled
 var AllSplitsSelected = false;
 
 function analyzeSplits(event) {
@@ -59,6 +61,11 @@ function onPercentAccuracyChange(value) {
 function onTimingModeChange(value) {
     TimingMode = value;
     localStorage.setItem("timing_mode", value);
+}
+
+function onRemoveOutliersChange(value) {
+    RemoveOutliers = value;
+    localStorage.setItem("remove_outliers", (value) ? "true" : "false");
 }
 
 function selectAllToggle(value) {
@@ -337,14 +344,15 @@ function parseSegments(segmentList) {
         segmentLifetimes[i] = 0;
     }
 
+    // iterate over all splits
     for (var i = 0; i < segmentList.length; ++i) {
         var row = document.createElement("tr");
         row.className = "split";
-        var segment = segmentList[i];
+        var segment = segmentList[i]; // current split
 
         var bestTimeContainer = segment.getElementsByTagName("BestSegmentTime")[0].getElementsByTagName(TimingMode);
         var bestTime = (bestTimeContainer && bestTimeContainer.length > 0) ? bestTimeContainer[0].textContent.trim() : "00:00:00.000";
-        var segmentHistory = segment.getElementsByTagName("SegmentHistory")[0];
+        var segmentHistory = segment.getElementsByTagName("SegmentHistory")[0]; // all times for this split
 
         totalBestTime += convertSegmentStrToMs(bestTime);
 
@@ -352,18 +360,25 @@ function parseSegments(segmentList) {
         var bestTimeDate = undefined;
         var currentAvg = 0;
         var avgCnt = 0;
+        var ignoredIds = []; // track the attempts that were skipped when averaging times
+        // iterate over all attempts of current split
         for (var k = 0; k < segmentHistory.childElementCount; ++k) {
-            var timeNode = segmentHistory.children[k];
-            var timeNodeId = parseInt(timeNode.attributes["id"].nodeValue) - 1;
+            var timeNode = segmentHistory.children[k]; // time information about segment attempt
+            var timeNodeId = parseInt(timeNode.attributes["id"].nodeValue) - 1; // attemptId for this segment time
 
             // update latest segment a run has been seen at
+            var hasPreviousSegment = segmentLifetimes[timeNodeId] === i; // check if the current attempt skipped the previous split
             segmentLifetimes[timeNodeId] = i + 1; // treat 0 as having not finished a split, so offset by 1 for each completed split
 
             if (timeNode.children && timeNode.children.length > 0) {
-                var segmentTimeContainer = timeNode.getElementsByTagName(TimingMode);
+                var segmentTimeContainer = timeNode.getElementsByTagName(TimingMode); // get GameTime vs RealTime
                 var segmentTime = (segmentTimeContainer && segmentTimeContainer.length > 0) ? segmentTimeContainer[0].textContent.trim() : "00:00:00.000";
-                currentAvg += convertSegmentStrToMs(segmentTime);
-                ++avgCnt;
+                if (hasPreviousSegment) { // only include a time if the previous segment was not skipped
+                    currentAvg += convertSegmentStrToMs(segmentTime);
+                    ++avgCnt;
+                } else {
+                    ignoredIds.push(k);
+                }
 
                 // found date best time was recorded
                 if (segmentTime === bestTime) {
@@ -377,6 +392,27 @@ function parseSegments(segmentList) {
             }
         }
         currentAvg /= avgCnt;
+        // remove any times from average that are more than double the previous calculated average
+        if (RemoveOutliers) {
+            var oldAvg = currentAvg;
+            currentAvg = 0;
+            avgCnt = 0;
+            for (var k = 0; k < segmentHistory.childElementCount; ++k) {
+                var timeNode = segmentHistory.children[k];
+                var timeNodeId = parseInt(timeNode.attributes["id"].nodeValue) - 1;
+    
+                if (timeNode.children && timeNode.children.length > 0) {
+                    var segmentTimeContainer = timeNode.getElementsByTagName(TimingMode);
+                    var segmentTime = (segmentTimeContainer && segmentTimeContainer.length > 0) ? segmentTimeContainer[0].textContent.trim() : "00:00:00.000";
+                    var time = convertSegmentStrToMs(segmentTime);
+                    if (time < oldAvg * SplitOutlierThreshold && !ignoredIds.includes(k)) {
+                        currentAvg += time;
+                        ++avgCnt;
+                    }
+                }
+            }
+            currentAvg /= avgCnt;
+        }
         if (!isNaN(currentAvg)) {
             totalAvgTime += currentAvg;
         }
@@ -563,5 +599,6 @@ $(document).ready(function() {
         $("#col-visibility-" + i).prop("checked", localStorageGetWithDefault("col-visibility-" + i, "true") === "true").change();
     }
 
+    $("#outliers").prop("checked", localStorageGetWithDefault("remove_outliers", "false") === "true").change();
     $("#allSplitsSelected").prop("checked", localStorageGetWithDefault("allSplitsSelected", "false") === "true").change();
 });

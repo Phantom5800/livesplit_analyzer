@@ -129,6 +129,13 @@
                             </td>
                             <td>How many digits of accuracy to display for percentages.</td>
                         </tr>
+                        <tr>
+                            <td class="header">Remove Outliers from Average</td>
+                            <td style="text-align: right;">
+                                <input id="outliers" type="checkbox" onchange="onRemoveOutliersChange(this.checked)">
+                            </td>
+                            <td>Removes split times from averages that are significantly larger.</td>
+                        </tr>
                     </table>
                     <ul>
                         <li>
