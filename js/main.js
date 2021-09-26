@@ -75,7 +75,11 @@ function updateTimesave(segmentCount) {
     var selectedCount = 0;
 
     for (var i = 0; i < segmentCount; ++i) {
-        var pb_time = convertSegmentStrToMs($("#pb-segment-" + i).html());
+        var pb_time_str = $("#pb-segment-" + i).html();
+        if (pb_time_str[0] === '\u2606') {
+            pb_time_str = pb_time_str.substr(2, pb_time_str.length - 4);
+        }
+        var pb_time = convertSegmentStrToMs(pb_time_str);
         var best_time = convertSegmentStrToMs($("#best-segment-" + i).html());
         var includeThisTime = document.getElementById("include-" + i).checked;
         if (includeThisTime) {
@@ -318,19 +322,6 @@ function findDayOfAttempt(attemptTime) {
     return undefined;
 }
 
-function trimSegmentTime(time) {
-    var decimalIndex = time.lastIndexOf('.');
-    if (decimalIndex !== -1) {
-        var offset = 0;
-        if (MillisecondAccuracy > 0) {
-            offset = MillisecondAccuracy + 1;
-        }
-        return time.substr(0, decimalIndex + offset);
-    } else {
-        return time;
-    }
-}
-
 // Parse the splits data out into meaningful information
 function parseSegments(segmentList) {
     // parse the xml into meaningful data
@@ -440,7 +431,7 @@ function parseSegments(segmentList) {
                             var fullTime = (fullTimeContainer && fullTimeContainer.length > 0) ? fullTimeContainer[0].textContent : "00:00:00.000";
                             currentPBTime = currentPBSplitTime;
                             currentPBSplitTime = convertSegmentStrToMs(fullTime);
-                            col.innerHTML = trimSegmentTime(fullTime);
+                            col.innerHTML = convertMsToTimeString(convertSegmentStrToMs(fullTime));
     
                             // final split time
                             if (i === segmentList.length - 1) {
@@ -462,6 +453,8 @@ function parseSegments(segmentList) {
                 if (currentPBSegmentTime > 0) {
                     var bestMs = convertSegmentStrToMs(bestTime);
 
+                    col.innerHTML = convertMsToTimeString(currentPBSegmentTime);
+
                     // set style based on difference from best
                     if (currentPBSegmentTime > bestMs + LargeGapMs) {
                         col.className += " large_gap";
@@ -469,9 +462,9 @@ function parseSegments(segmentList) {
                         col.className += " medium_gap";
                     } else if (currentPBSegmentTime > bestMs + SmallGapMs) {
                         col.className += " small_gap";
-                    } 
-
-                    col.innerHTML = convertMsToTimeString(currentPBSegmentTime);
+                    } else if (currentPBSegmentTime === bestMs) {
+                        col.innerHTML = "\u2606 " + col.innerHTML + " \u2606";
+                    }
                 }
             } else if (j === AVG_SEGMENT_TIME_COL) { // average segment time
                 col.innerHTML = convertMsToTimeString(currentAvg);
@@ -487,7 +480,7 @@ function parseSegments(segmentList) {
                 } 
             } else if (j === BEST_SEGMENT_TIME_COL) { // best segment time
                 col.id = "best-segment-" + i;
-                col.innerHTML = trimSegmentTime(bestTime);
+                col.innerHTML = convertMsToTimeString(convertSegmentStrToMs(bestTime));
             } else if (j === BEST_SEGMENT_DATE_COL) { // best segment time date
                 col.innerHTML = bestTimeDate;
             } else if (j === RUNS_ENDED_COL) { // resets during this split
