@@ -98,3 +98,12 @@ select, input[type="number"] {
     color: white;
     font-weight: bold;
 }
+
+button {
+    width: 100%;
+    background-color: rgba(0,0,128,0.25);
+    border: 2px solid rgb(0,32,128);
+
+    color: white;
+    font-weight: bold;
+}
