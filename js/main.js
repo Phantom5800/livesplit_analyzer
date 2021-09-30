@@ -641,7 +641,35 @@ function handleUriGen() {
     uri += "?game=" + encodeURIComponent($("#game").text());
     uri += "&cat=" + encodeURIComponent($("#category").text());
     uri += "&data=" + pageContent;
+    uri += "&summary=" + LZString.compressToEncodedURIComponent(exportSummaryTable());
     navigator.clipboard.writeText(uri);
+}
+
+function exportSummaryTable() {
+    var summary = $("#pb_date").text() + ","
+        + $("#pb_offset").text() + ","
+        + $("#average_time").text() + ","
+        + $("#best_time").text() + ","
+        + $("#last_finished_time").text() + ","
+        + $("#finished_run_days").text() + ","
+        + $("#total_time").text() + ","
+        + $("#completed").text() + ","
+        + $("#attempts").text() +",";
+
+    return summary;
+}
+
+function importSummaryTable(data) {
+    var segments = data.split(',');
+    $("#pb_date").html(segments[0]);
+    $("#pb_offset").html(segments[1]);
+    $("#average_time").html(segments[2]);
+    $("#best_time").html(segments[3]);
+    $("#last_finished_time").html(segments[4]);
+    $("#finished_run_days").html(segments[5]);
+    $("#total_time").html(segments[6]);
+    $("#completed").html(segments[7]);
+    $("#attempts").html(segments[8]);
 }
 
 function exportCsv() {
@@ -736,6 +764,11 @@ $(document).ready(function() {
     if (dataset.length > 0) {
         var decompressed = LZString.decompressFromEncodedURIComponent(dataset);
         importCsvFromUri(decompressed);
+    }
+    var summary = getUrlParam("summary", "");
+    if (summary.length > 0) {
+        var decompressed = LZString.decompressFromEncodedURIComponent(summary);
+        importSummaryTable(decompressed);
     }
 
     // read all local storage based settings
