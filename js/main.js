@@ -586,15 +586,18 @@ function handleExport() {
         file_type = "text/csv";
     }
 
+    // generate blob for new file
     var fileData = new Blob([generated_file], { type: file_type });
     var fileOut = window.URL.createObjectURL(fileData);
     
+    // prompt file download
     var fileLink = document.createElement("a");
     fileLink.download = $("#game").text() + "-" + $("#category").text() + "." + export_type;
     fileLink.href = fileOut;
     fileLink.click();
 
-    console.log(generated_file);
+    // revoke blob url
+    window.URL.revokeObjectURL(fileOut);
 }
 
 function generateCsv() {
