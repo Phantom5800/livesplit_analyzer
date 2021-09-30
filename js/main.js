@@ -576,6 +576,47 @@ function preventDefaultDrag(event) {
     event.preventDefault();
 }
 
+function handleExport() {
+    var export_type = $("#export_settings option:selected").text();
+    var generated_file = ""
+    var file_type = "";
+
+    if (export_type === "csv") {
+        generated_file = generateCsv();
+        file_type = "text/csv";
+    }
+
+    var fileData = new Blob([generated_file], { type: file_type });
+    var fileOut = window.URL.createObjectURL(fileData);
+    
+    var fileLink = document.createElement("a");
+    fileLink.download = $("#game").text() + "-" + $("#category").text() + "." + export_type;
+    fileLink.href = fileOut;
+    fileLink.click();
+
+    console.log(generated_file);
+}
+
+function generateCsv() {
+    var out = "";
+
+    var rowCount = $(".col-1").length;
+    for (var i = 0; i < rowCount; ++i) {
+        for (var j = 0; j < COL_CNT; ++j) {
+            var cell = $(".col-" + (j + 1))[i];
+            if (cell) {
+                out += cell.innerText;
+                if (j < COL_CNT - 1) {
+                    out += ",";
+                }
+            }
+        }
+        out += "\n";
+    }
+
+    return out;
+}
+
 // load local storage settings on page load if they exist
 $(document).ready(function() {
     function localStorageGetWithDefault(key, defaultValue) {
