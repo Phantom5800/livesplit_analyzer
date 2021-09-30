@@ -620,7 +620,7 @@ function getUrlParam(parameter, defaultValue) {
     if (parameter in urlParams) {
         urlParameter = urlParams[parameter];
     }
-    return decodeURI(urlParameter);
+    return urlParameter;
 }
 
 function getBaseUri() {
@@ -638,7 +638,9 @@ function handleUriGen() {
     pageContent = LZString.compressToEncodedURIComponent(pageContent);
 
     var uri = getBaseUri();
-    uri += "?data=" + pageContent;
+    uri += "?game=" + encodeURIComponent($("#game").text());
+    uri += "&cat=" + encodeURIComponent($("#category").text());
+    uri += "&data=" + pageContent;
     navigator.clipboard.writeText(uri);
 }
 
@@ -682,6 +684,7 @@ function importCsvFromUri(csv) {
         checkbox_col.appendChild(checkbox);
         checkbox_col.style.width = "2em";
         row.appendChild(checkbox_col);
+        dataTable.appendChild(row);
 
         // add each column from csv
         for (var j = 0; j < parts.length; ++j) {
@@ -691,20 +694,44 @@ function importCsvFromUri(csv) {
 
             if (j + 1 === PB_SEGMENT_TIME_COL) {
                 col.id = "pb-segment-" + (i - 1);
+            } else if (j + 1 === AVG_SEGMENT_TIME_COL) {
+                col.id = "avg-segment-" + (i - 1);
             } else if (j + 1 === BEST_SEGMENT_TIME_COL) {
                 col.id = "best-segment-" + (i - 1);
+
+                var bestTime = convertSegmentStrToMs(parts[j]);
+                var pbTime = convertSegmentStrToMs($("#pb-segment-" + (i - 1)).text());
+                var avgTime = convertSegmentStrToMs($("#avg-segment-" + (i - 1)).text());
+
+                function setColors(time, bestTime, elem) {
+                    if (time - bestTime > LargeGapMs) {
+                        elem.className += " large_gap";
+                    } else if (time - bestTime > MediumGapMs) {
+                        elem.className += " medium_gap";
+                    } else if (time - bestTime > SmallGapMs) {
+                        elem.className += " small_gap";
+                    }
+                }
+
+                setColors(pbTime, bestTime, document.getElementById("pb-segment-" + (i - 1)));
+                setColors(avgTime, bestTime, document.getElementById("avg-segment-" + (i - 1)));
             }
 
             row.appendChild(col);
         }
-        dataTable.appendChild(row);
     }
+
+    $("#pb_time").html($(".col-" + PB_SPLIT_TIME_COL + ":last").html());
 }
 
 // load local storage settings on page load if they exist
 $(document).ready(function() {
     // check for uri information
     getUrlVars();
+    var game = getUrlParam("game", "Game Title");
+    $("#game").html(decodeURIComponent(game));
+    var category = getUrlParam("cat", "Category");
+    $("#category").html(decodeURIComponent(category));
     var dataset = getUrlParam("data", "");
     if (dataset.length > 0) {
         var decompressed = LZString.decompressFromEncodedURIComponent(dataset);
