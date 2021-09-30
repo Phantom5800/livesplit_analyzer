@@ -582,7 +582,7 @@ function handleExport() {
     var file_type = "";
 
     if (export_type === "csv") {
-        generated_file = generateCsv();
+        generated_file = exportCsv();
         file_type = "text/csv";
     }
 
@@ -600,7 +600,49 @@ function handleExport() {
     window.URL.revokeObjectURL(fileOut);
 }
 
-function generateCsv() {
+var urlParams = {};
+
+function getUrlParamCount() {
+    return Object.keys(urlParams).length;
+}
+
+function getUrlVars() {
+    if (getUrlParamCount() === 0) {
+        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+        urlParams[key.toLowerCase()] = value;
+        });
+    }
+    return urlParams;
+}
+
+function getUrlParam(parameter, defaultValue) {
+    var urlParameter = defaultValue;
+    if (parameter in urlParams) {
+        urlParameter = urlParams[parameter];
+    }
+    return decodeURI(urlParameter);
+}
+
+function getBaseUri() {
+    var baseUri = "";
+    if (location.hostname === "") { // local file
+        baseUri = window.location.protocol + "/" + window.location.host + "/" + window.location.pathname.split('.')[0] + ".html";
+    } else { // hosted site
+        baseUri = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname.split('/')[1];
+    }
+    return baseUri;
+}
+
+function handleUriGen() {
+    var pageContent = exportCsv();
+    pageContent = LZString.compressToEncodedURIComponent(pageContent);
+
+    var uri = getBaseUri();
+    uri += "?data=" + pageContent;
+    navigator.clipboard.writeText(uri);
+}
+
+function exportCsv() {
     var out = "";
 
     var rowCount = $(".col-1").length;
@@ -609,7 +651,7 @@ function generateCsv() {
             var cell = $(".col-" + (j + 1))[i];
             if (cell) {
                 out += cell.innerText;
-                if (j < COL_CNT - 1) {
+                if (j < COL_CNT - 2) {
                     out += ",";
                 }
             }
@@ -620,8 +662,56 @@ function generateCsv() {
     return out;
 }
 
+function importCsvFromUri(csv) {
+    var lines = csv.split('\n');
+
+    var dataTable = document.getElementById("splits_table");
+    for (var i = 1; i < lines.length - 1; ++i) {
+        var parts = lines[i].split(',');
+        var row = document.createElement("tr");
+
+        // add checkbox first
+        var checkbox_col = document.createElement("td");
+        var checkbox = document.createElement("input");
+        checkbox.id = "include-" + (i - 1);
+        checkbox.type = "checkbox";
+        checkbox.checked = AllSplitsSelected;
+        checkbox.onchange = function() {
+            updateTimesave(lines.length - 2);
+        }
+        checkbox_col.appendChild(checkbox);
+        checkbox_col.style.width = "2em";
+        row.appendChild(checkbox_col);
+
+        // add each column from csv
+        for (var j = 0; j < parts.length; ++j) {
+            var col = document.createElement("td");
+            col.className = "col-" + (j + 1);
+            col.innerHTML = parts[j];
+
+            if (j + 1 === PB_SEGMENT_TIME_COL) {
+                col.id = "pb-segment-" + (i - 1);
+            } else if (j + 1 === BEST_SEGMENT_TIME_COL) {
+                col.id = "best-segment-" + (i - 1);
+            }
+
+            row.appendChild(col);
+        }
+        dataTable.appendChild(row);
+    }
+}
+
 // load local storage settings on page load if they exist
 $(document).ready(function() {
+    // check for uri information
+    getUrlVars();
+    var dataset = getUrlParam("data", "");
+    if (dataset.length > 0) {
+        var decompressed = LZString.decompressFromEncodedURIComponent(dataset);
+        importCsvFromUri(decompressed);
+    }
+
+    // read all local storage based settings
     function localStorageGetWithDefault(key, defaultValue) {
         const value = localStorage.getItem(key);
         if (!value) {
