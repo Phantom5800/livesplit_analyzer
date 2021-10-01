@@ -281,7 +281,7 @@ function convertMsToTimeString(ms) {
 function countAttempts(attemptHistory) {
     var completedRuns = 0;
     //$("#attempts").html(xmlDoc.getElementsByTagName("AttemptCount")[0].textContent);
-    $("#attempts").html(attemptHistory.childElementCount);
+    $("#attempts").html(attemptHistory.childElementCount.toLocaleString());
     for (var i = 0; i < attemptHistory.childElementCount; ++i) {
         var attemptData = {};
         var attempt = attemptHistory.children[i];
@@ -304,9 +304,9 @@ function countAttempts(attemptHistory) {
         }
         attemptDataTable.push(attemptData);
     }
-    var attemptCount = parseInt($("#attempts").html());
+    var attemptCount = parseInt($("#attempts").html().replace(/,/g, ""));
     var completedPercent = Math.trunc(completedRuns / attemptCount * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy);
-    $("#completed").html(completedRuns + " (" + completedPercent + "%)");
+    $("#completed").html(completedRuns.toLocaleString() + " (" + completedPercent + "%)");
 
     // calculate total play time
     var totalPlayTime = 0;
@@ -339,7 +339,8 @@ function parseSegments(segmentList) {
     var totalAvgTime = 0;
     var currentPBTime = 0;
     var currentPBSplitTime = 0;
-    segmentLifetimes.length = parseInt($("#attempts").html());
+    var attemptCnt = parseInt($("#attempts").html().replace(/,/g, ""));
+    segmentLifetimes.length = attemptCnt;
     for (var i = 0; i < segmentLifetimes.length; ++i) {
         segmentLifetimes[i] = 0;
     }
@@ -559,12 +560,12 @@ function parseSegments(segmentList) {
     for (var i = 0; i < runsDeadAtSegment.length; ++i) {
         var count = runsDeadAtSegment[i];
         if (count > 0) {
-            var percentage = Math.round(count / parseInt($("#attempts").html()) * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy)
-            $("#resets-" + i).html(count + " (" + percentage + "%)");
+            var percentage = Math.round(count / attemptCnt * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy)
+            $("#resets-" + i).html(count.toLocaleString() + " (" + percentage + "%)");
             
             totalDeaths += count;
-            var totalPercentage = Math.round(totalDeaths / parseInt($("#attempts").html()) * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy);
-            $("#resets-before-" + i).html(totalDeaths + " (" + totalPercentage + "%)");
+            var totalPercentage = Math.round(totalDeaths / attemptCnt * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy);
+            $("#resets-before-" + i).html(totalDeaths.toLocaleString() + " (" + totalPercentage + "%)");
         }
     }
 
