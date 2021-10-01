@@ -478,7 +478,7 @@ function parseSegments(segmentList) {
     
                                 // convert from ms->days
                                 var daysSincePB = Math.trunc(parseInt(new Date() - new Date(dayOfPB)) / 1000 / 60 / 60 / 24);
-                                $("#pb_offset").html(daysSincePB);
+                                $("#pb_offset").html(daysSincePB.toLocaleString());
                             }
                         }
                     }
@@ -540,7 +540,7 @@ function parseSegments(segmentList) {
             $("#last_finished_time").html(convertMsToTimeString(attemptDataTable[i].finishTime));
             // effectively get only the day from end time
             var msSinceLastRun = parseInt(new Date() - new Date(attemptDataTable[i].endTime.toLocaleString("en-US", {"dateStyle": "short"})));
-            $("#finished_run_days").html(Math.trunc(msSinceLastRun / 1000 / 60 / 60 / 24));
+            $("#finished_run_days").html(Math.trunc(msSinceLastRun / 1000 / 60 / 60 / 24).toLocaleString());
             break;
         }
     }
