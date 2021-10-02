@@ -583,7 +583,7 @@ function handleExport() {
     var file_type = "";
 
     if (export_type === "csv") {
-        generated_file = exportCsv();
+        generated_file = exportCsv(false);
         file_type = "text/csv";
     }
 
@@ -635,7 +635,7 @@ function getBaseUri() {
 }
 
 function handleUriGen() {
-    var pageContent = exportCsv();
+    var pageContent = exportCsv(true);
     pageContent = LZString.compressToEncodedURIComponent(pageContent);
 
     var uri = getBaseUri();
@@ -673,7 +673,7 @@ function importSummaryTable(data) {
     $("#attempts").html(segments[8]);
 }
 
-function exportCsv() {
+function exportCsv(encode_comma) {
     var out = "";
 
     var rowCount = $(".col-1").length;
@@ -681,7 +681,11 @@ function exportCsv() {
         for (var j = 0; j < COL_CNT; ++j) {
             var cell = $(".col-" + (j + 1))[i];
             if (cell) {
-                out += cell.innerText;
+                var text = cell.innerText;
+                if (encode_comma) {
+                    text = text.replace(/,/g, '`');
+                }
+                out += text;
                 if (j < COL_CNT - 2) {
                     out += ",";
                 }
@@ -719,7 +723,7 @@ function importCsvFromUri(csv) {
         for (var j = 0; j < parts.length; ++j) {
             var col = document.createElement("td");
             col.className = "col-" + (j + 1);
-            col.innerHTML = parts[j];
+            col.innerHTML = parts[j].replace(/`/g, ',');
 
             if (j + 1 === PB_SEGMENT_TIME_COL) {
                 col.id = "pb-segment-" + (i - 1);
