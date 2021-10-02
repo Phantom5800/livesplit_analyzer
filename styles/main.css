@@ -22,6 +22,7 @@ h3 {
 
 footer {
     font-size: 0.6em;
+    padding-bottom: 2em;
 }
 
 #content {
@@ -95,6 +96,15 @@ select, input[type="number"] {
     text-align: right;
     background-color: rgb(25,25,25);
     border: none;
+    color: white;
+    font-weight: bold;
+}
+
+button {
+    width: 100%;
+    background-color: rgba(0,0,128,0.25);
+    border: 2px solid rgb(0,32,128);
+
     color: white;
     font-weight: bold;
 }

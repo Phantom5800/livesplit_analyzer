@@ -280,8 +280,9 @@ function convertMsToTimeString(ms) {
 
 function countAttempts(attemptHistory) {
     var completedRuns = 0;
+    var markedFirstRun = false;
     //$("#attempts").html(xmlDoc.getElementsByTagName("AttemptCount")[0].textContent);
-    $("#attempts").html(attemptHistory.childElementCount);
+    $("#attempts").html(attemptHistory.childElementCount.toLocaleString());
     for (var i = 0; i < attemptHistory.childElementCount; ++i) {
         var attemptData = {};
         var attempt = attemptHistory.children[i];
@@ -290,6 +291,7 @@ function countAttempts(attemptHistory) {
             if (attemptTimeContainer && attemptTimeContainer.length > 0) {
                 attemptData.finishTime = convertSegmentStrToMs(attemptTimeContainer[0].textContent);
             }
+            // first completed run
             ++completedRuns;
         }
 
@@ -298,15 +300,24 @@ function countAttempts(attemptHistory) {
                 attemptData.startTime = convertStrToDate(attempt.attributes['started'].nodeValue);
                 attemptData.endTime = convertStrToDate(attempt.attributes['ended'].nodeValue);
                 attemptData.duration = attemptData.endTime - attemptData.startTime; // elapsed time in ms
+
+                if (completedRuns === 1 && !markedFirstRun) {
+                    markedFirstRun = true;
+                    $("#first_date").html(attemptData.endTime.toLocaleString("en-US", {"dateStyle": "short"}));
+                    $("#first_time").html(convertMsToTimeString(attemptData.duration));
+
+                    var daysSinceFirstRun = Math.trunc(parseInt(new Date() - attemptData.endTime) / 1000 / 60 / 60 / 24);
+                    $("#days_running").html(daysSinceFirstRun.toLocaleString());
+                }
             }
         } catch(error) {
             console.log(error);
         }
         attemptDataTable.push(attemptData);
     }
-    var attemptCount = parseInt($("#attempts").html());
+    var attemptCount = parseInt($("#attempts").html().replace(/,/g, ""));
     var completedPercent = Math.trunc(completedRuns / attemptCount * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy);
-    $("#completed").html(completedRuns + " (" + completedPercent + "%)");
+    $("#completed").html(completedRuns.toLocaleString() + " (" + completedPercent + "%)");
 
     // calculate total play time
     var totalPlayTime = 0;
@@ -339,7 +350,8 @@ function parseSegments(segmentList) {
     var totalAvgTime = 0;
     var currentPBTime = 0;
     var currentPBSplitTime = 0;
-    segmentLifetimes.length = parseInt($("#attempts").html());
+    var attemptCnt = parseInt($("#attempts").html().replace(/,/g, ""));
+    segmentLifetimes.length = attemptCnt;
     for (var i = 0; i < segmentLifetimes.length; ++i) {
         segmentLifetimes[i] = 0;
     }
@@ -478,7 +490,7 @@ function parseSegments(segmentList) {
     
                                 // convert from ms->days
                                 var daysSincePB = Math.trunc(parseInt(new Date() - new Date(dayOfPB)) / 1000 / 60 / 60 / 24);
-                                $("#pb_offset").html(daysSincePB);
+                                $("#pb_offset").html(daysSincePB.toLocaleString());
                             }
                         }
                     }
@@ -540,7 +552,7 @@ function parseSegments(segmentList) {
             $("#last_finished_time").html(convertMsToTimeString(attemptDataTable[i].finishTime));
             // effectively get only the day from end time
             var msSinceLastRun = parseInt(new Date() - new Date(attemptDataTable[i].endTime.toLocaleString("en-US", {"dateStyle": "short"})));
-            $("#finished_run_days").html(Math.trunc(msSinceLastRun / 1000 / 60 / 60 / 24));
+            $("#finished_run_days").html(Math.trunc(msSinceLastRun / 1000 / 60 / 60 / 24).toLocaleString());
             break;
         }
     }
@@ -559,12 +571,12 @@ function parseSegments(segmentList) {
     for (var i = 0; i < runsDeadAtSegment.length; ++i) {
         var count = runsDeadAtSegment[i];
         if (count > 0) {
-            var percentage = Math.round(count / parseInt($("#attempts").html()) * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy)
-            $("#resets-" + i).html(count + " (" + percentage + "%)");
+            var percentage = Math.round(count / attemptCnt * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy)
+            $("#resets-" + i).html(count.toLocaleString() + " (" + percentage + "%)");
             
             totalDeaths += count;
-            var totalPercentage = Math.round(totalDeaths / parseInt($("#attempts").html()) * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy);
-            $("#resets-before-" + i).html(totalDeaths + " (" + totalPercentage + "%)");
+            var totalPercentage = Math.round(totalDeaths / attemptCnt * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy);
+            $("#resets-before-" + i).html(totalDeaths.toLocaleString() + " (" + totalPercentage + "%)");
         }
     }
 
@@ -576,8 +588,213 @@ function preventDefaultDrag(event) {
     event.preventDefault();
 }
 
+function handleExport() {
+    var export_type = $("#export_settings option:selected").text();
+    var generated_file = ""
+    var file_type = "";
+
+    if (export_type === "csv") {
+        generated_file = exportCsv(false);
+        file_type = "text/csv";
+    }
+
+    // generate blob for new file
+    var fileData = new Blob([generated_file], { type: file_type });
+    var fileOut = window.URL.createObjectURL(fileData);
+    
+    // prompt file download
+    var fileLink = document.createElement("a");
+    fileLink.download = $("#game").text() + "-" + $("#category").text() + "." + export_type;
+    fileLink.href = fileOut;
+    fileLink.click();
+
+    // revoke blob url
+    window.URL.revokeObjectURL(fileOut);
+}
+
+var urlParams = {};
+
+function getUrlParamCount() {
+    return Object.keys(urlParams).length;
+}
+
+function getUrlVars() {
+    if (getUrlParamCount() === 0) {
+        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+        urlParams[key.toLowerCase()] = value;
+        });
+    }
+    return urlParams;
+}
+
+function getUrlParam(parameter, defaultValue) {
+    var urlParameter = defaultValue;
+    if (parameter in urlParams) {
+        urlParameter = urlParams[parameter];
+    }
+    return urlParameter;
+}
+
+function getBaseUri() {
+    var baseUri = "";
+    if (location.hostname === "") { // local file
+        baseUri = window.location.protocol + "/" + window.location.host + "/" + window.location.pathname.split('.')[0] + ".html";
+    } else { // hosted site
+        baseUri = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname.split('/')[1];
+    }
+    return baseUri;
+}
+
+function handleUriGen() {
+    var pageContent = exportCsv(true);
+    pageContent = LZString.compressToEncodedURIComponent(pageContent);
+
+    var uri = getBaseUri();
+    uri += "?game=" + encodeURIComponent($("#game").text());
+    uri += "&cat=" + encodeURIComponent($("#category").text());
+    uri += "&data=" + pageContent;
+    uri += "&summary=" + LZString.compressToEncodedURIComponent(exportSummaryTable());
+    navigator.clipboard.writeText(uri);
+}
+
+function exportSummaryTable() {
+    var summary = $("#pb_date").text() + ","
+        + $("#pb_offset").text() + ","
+        + $("#average_time").text() + ","
+        + $("#best_time").text() + ","
+        + $("#last_finished_time").text() + ","
+        + $("#finished_run_days").text() + ","
+        + $("#total_time").text() + ","
+        + $("#completed").text() + ","
+        + $("#attempts").text() +","
+        + $("#first_time").text() +","
+        + $("#first_date").text() +","
+        + $("#days_running").text() +",";
+
+    return summary;
+}
+
+function importSummaryTable(data) {
+    var segments = data.split(',');
+    $("#pb_date").html(segments[0]);
+    $("#pb_offset").html(segments[1]);
+    $("#average_time").html(segments[2]);
+    $("#best_time").html(segments[3]);
+    $("#last_finished_time").html(segments[4]);
+    $("#finished_run_days").html(segments[5]);
+    $("#total_time").html(segments[6]);
+    $("#completed").html(segments[7]);
+    $("#attempts").html(segments[8]);
+    $("#first_time").html(segments[9]);
+    $("#first_date").html(segments[10]);
+    $("#days_running").html(segments[11]);
+}
+
+function exportCsv(encode_comma) {
+    var out = "";
+
+    var rowCount = $(".col-1").length;
+    var startRow = (encode_comma) ? 1 : 0;
+    for (var i = startRow; i < rowCount; ++i) {
+        for (var j = 0; j < COL_CNT; ++j) {
+            var cell = $(".col-" + (j + 1))[i];
+            if (cell) {
+                var text = cell.innerText;
+                if (encode_comma) {
+                    text = text.replace(/,/g, '`');
+                }
+                out += text;
+                if (j < COL_CNT - 2) {
+                    out += ",";
+                }
+            }
+        }
+        out += "\n";
+    }
+
+    return out;
+}
+
+function importCsvFromUri(csv) {
+    var lines = csv.split('\n');
+
+    var dataTable = document.getElementById("splits_table");
+    for (var i = 0; i < lines.length - 1; ++i) {
+        var parts = lines[i].split(',');
+        var row = document.createElement("tr");
+
+        // add checkbox first
+        var checkbox_col = document.createElement("td");
+        var checkbox = document.createElement("input");
+        checkbox.id = "include-" + (i - 1);
+        checkbox.type = "checkbox";
+        checkbox.checked = AllSplitsSelected;
+        checkbox.onchange = function() {
+            updateTimesave(lines.length - 2);
+        }
+        checkbox_col.appendChild(checkbox);
+        checkbox_col.style.width = "2em";
+        row.appendChild(checkbox_col);
+        dataTable.appendChild(row);
+
+        // add each column from csv
+        for (var j = 0; j < parts.length; ++j) {
+            var col = document.createElement("td");
+            col.className = "col-" + (j + 1);
+            col.innerHTML = parts[j].replace(/`/g, ',');
+
+            if (j + 1 === PB_SEGMENT_TIME_COL) {
+                col.id = "pb-segment-" + (i - 1);
+            } else if (j + 1 === AVG_SEGMENT_TIME_COL) {
+                col.id = "avg-segment-" + (i - 1);
+            } else if (j + 1 === BEST_SEGMENT_TIME_COL) {
+                col.id = "best-segment-" + (i - 1);
+
+                var bestTime = convertSegmentStrToMs(parts[j]);
+                var pbTime = convertSegmentStrToMs($("#pb-segment-" + (i - 1)).text());
+                var avgTime = convertSegmentStrToMs($("#avg-segment-" + (i - 1)).text());
+
+                function setColors(time, bestTime, elem) {
+                    if (time - bestTime > LargeGapMs) {
+                        elem.className += " large_gap";
+                    } else if (time - bestTime > MediumGapMs) {
+                        elem.className += " medium_gap";
+                    } else if (time - bestTime > SmallGapMs) {
+                        elem.className += " small_gap";
+                    }
+                }
+
+                setColors(pbTime, bestTime, document.getElementById("pb-segment-" + (i - 1)));
+                setColors(avgTime, bestTime, document.getElementById("avg-segment-" + (i - 1)));
+            }
+
+            row.appendChild(col);
+        }
+    }
+
+    $("#pb_time").html($(".col-" + PB_SPLIT_TIME_COL + ":last").html());
+}
+
 // load local storage settings on page load if they exist
 $(document).ready(function() {
+    // check for uri information
+    getUrlVars();
+    var game = getUrlParam("game", "Game Title");
+    $("#game").html(decodeURIComponent(game));
+    var category = getUrlParam("cat", "Category");
+    $("#category").html(decodeURIComponent(category));
+    var dataset = getUrlParam("data", "");
+    if (dataset.length > 0) {
+        var decompressed = LZString.decompressFromEncodedURIComponent(dataset);
+        importCsvFromUri(decompressed);
+    }
+    var summary = getUrlParam("summary", "");
+    if (summary.length > 0) {
+        var decompressed = LZString.decompressFromEncodedURIComponent(summary);
+        importSummaryTable(decompressed);
+    }
+
+    // read all local storage based settings
     function localStorageGetWithDefault(key, defaultValue) {
         const value = localStorage.getItem(key);
         if (!value) {

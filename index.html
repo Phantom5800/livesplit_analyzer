@@ -2,6 +2,7 @@
     <head>
         <title>Livesplit Analyzer</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+        <script src="js/libs/lz-string/lz-string.js"></script>
         <script src="js/main.js"></script>
         <link rel="stylesheet" href="styles/main.css">
     </head>
@@ -41,6 +42,18 @@
                         <tr>
                             <td class="header">Days Since Finished Run</td>
                             <td id="finished_run_days"></td>
+                        </tr>
+                        <tr>
+                            <td class="header">First Run Date</td>
+                            <td id="first_date"></td>
+                        </tr>
+                        <tr>
+                            <td class="header">Days Since First Run</td>
+                            <td id="days_running"></td>
+                        </tr>
+                        <tr>
+                            <td class="header">First Run Time</td>
+                            <td id="first_time"></td>
                         </tr>
                         <tr>
                             <td class="header">Total Play Time</td>
@@ -142,6 +155,46 @@
                             Make sure to adjust settings before dropping in a splits file.
                         </li>
                     </ul>
+                </div>
+
+                <div class="flex_child">
+                    <h3>Share</h3>
+                    <table id="export_settings">
+                        <tr>
+                            <td class="header" style="width: 7em;">Export</td>
+                            <td style="width: 20em;">
+                                <select id="export_type">
+                                    <option>csv</option>
+                                    <!--<option>excel</option>-->
+                                </select>
+                            </td>
+                            <td style="width: 6em;"><button onclick="handleExport()">Export</button></td>
+                        </tr>
+                        <tr>
+                            <td class="header" style="width: 7em;">Link</td>
+                            <td style="width: 20em;">Get a sharable link to the current analysis.</td>
+                            <td style="width: 6em;"><button onclick="handleUriGen()">Copy Link</button></td>
+                        </tr>
+                        <!--
+                        <tr>
+                            <td class="header" style="width: 7em;">Social Media</td>
+                            <td style="width: 5em;">
+                                <select id="social_platform">
+                                    <option>Twitter</option>
+                                    <option>Facebook</option>
+                                </select>
+                            </td>
+                            <td style="width: 6em;"><button>Share</button></td>
+                        </tr>
+                        -->
+                    </table>
+                    <ul class="info">
+                        <li>Exported data will match settings configured before original import.</li>
+                    </ul>
+
+                    <!--
+                    <h3>Import</h3>
+                    -->
                 </div>
             </div>
     
