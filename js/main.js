@@ -677,7 +677,8 @@ function exportCsv(encode_comma) {
     var out = "";
 
     var rowCount = $(".col-1").length;
-    for (var i = 0; i < rowCount; ++i) {
+    var startRow = (encode_comma) ? 1 : 0;
+    for (var i = startRow; i < rowCount; ++i) {
         for (var j = 0; j < COL_CNT; ++j) {
             var cell = $(".col-" + (j + 1))[i];
             if (cell) {
@@ -701,7 +702,7 @@ function importCsvFromUri(csv) {
     var lines = csv.split('\n');
 
     var dataTable = document.getElementById("splits_table");
-    for (var i = 1; i < lines.length - 1; ++i) {
+    for (var i = 0; i < lines.length - 1; ++i) {
         var parts = lines[i].split(',');
         var row = document.createElement("tr");
 
