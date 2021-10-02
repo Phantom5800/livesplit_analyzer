@@ -280,6 +280,7 @@ function convertMsToTimeString(ms) {
 
 function countAttempts(attemptHistory) {
     var completedRuns = 0;
+    var markedFirstRun = false;
     //$("#attempts").html(xmlDoc.getElementsByTagName("AttemptCount")[0].textContent);
     $("#attempts").html(attemptHistory.childElementCount.toLocaleString());
     for (var i = 0; i < attemptHistory.childElementCount; ++i) {
@@ -290,6 +291,7 @@ function countAttempts(attemptHistory) {
             if (attemptTimeContainer && attemptTimeContainer.length > 0) {
                 attemptData.finishTime = convertSegmentStrToMs(attemptTimeContainer[0].textContent);
             }
+            // first completed run
             ++completedRuns;
         }
 
@@ -298,6 +300,15 @@ function countAttempts(attemptHistory) {
                 attemptData.startTime = convertStrToDate(attempt.attributes['started'].nodeValue);
                 attemptData.endTime = convertStrToDate(attempt.attributes['ended'].nodeValue);
                 attemptData.duration = attemptData.endTime - attemptData.startTime; // elapsed time in ms
+
+                if (completedRuns === 1 && !markedFirstRun) {
+                    markedFirstRun = true;
+                    $("#first_date").html(attemptData.endTime.toLocaleString("en-US", {"dateStyle": "short"}));
+                    $("#first_time").html(convertMsToTimeString(attemptData.duration));
+
+                    var daysSinceFirstRun = Math.trunc(parseInt(new Date() - attemptData.endTime) / 1000 / 60 / 60 / 24);
+                    $("#days_running").html(daysSinceFirstRun.toLocaleString());
+                }
             }
         } catch(error) {
             console.log(error);
@@ -655,7 +666,10 @@ function exportSummaryTable() {
         + $("#finished_run_days").text() + ","
         + $("#total_time").text() + ","
         + $("#completed").text() + ","
-        + $("#attempts").text() +",";
+        + $("#attempts").text() +","
+        + $("#first_time").text() +","
+        + $("#first_date").text() +","
+        + $("#days_running").text() +",";
 
     return summary;
 }
@@ -671,6 +685,9 @@ function importSummaryTable(data) {
     $("#total_time").html(segments[6]);
     $("#completed").html(segments[7]);
     $("#attempts").html(segments[8]);
+    $("#first_time").html(segments[9]);
+    $("#first_date").html(segments[10]);
+    $("#days_running").html(segments[11]);
 }
 
 function exportCsv(encode_comma) {
