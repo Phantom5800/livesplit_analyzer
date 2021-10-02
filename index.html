@@ -8,13 +8,13 @@
     </head>
     <body ondrop="analyzeSplits(event)" ondragover="preventDefaultDrag(event)">
         <div id="content">
-            <h1 id="game">Game Title</h1>
-            <h2 id="category">Category</h2>
+            <h1 id="game">Drag Splits File Into Page</h1>
+            <h2 id="category"></h2>
     
             <div class="flex_container">
                 <div class="flex_child">
                     <h3>Overall Stats</h3>
-                    <table id="stats">
+                    <table id="stats1">
                         <tr>
                             <td class="header">PB Time</td>
                             <td id="pb_time"></td>
@@ -36,6 +36,15 @@
                             <td id="best_time"></td>
                         </tr>
                         <tr>
+                            <td class="header">Possible Timesave</td>
+                            <td id="timesave"></td>
+                        </tr>
+                    </table>
+
+                    <div style="padding-top: 0.5em;"></div>
+
+                    <table id="stats2">
+                        <tr>
                             <td class="header">Latest Time</td>
                             <td id="last_finished_time"></td>
                         </tr>
@@ -43,6 +52,11 @@
                             <td class="header">Days Since Finished Run</td>
                             <td id="finished_run_days"></td>
                         </tr>
+                    </table>
+
+                    <div style="padding-top: 0.5em;"></div>
+
+                    <table id="stats3">
                         <tr>
                             <td class="header">First Run Date</td>
                             <td id="first_date"></td>
@@ -66,10 +80,6 @@
                         <tr>
                             <td class="header">Runs Attempted</td>
                             <td id="attempts"></td>
-                        </tr>
-                        <tr>
-                            <td class="header">Possible Timesave</td>
-                            <td id="timesave"></td>
                         </tr>
                     </table>
                 </div>
@@ -238,9 +248,6 @@
                         Source code for this page can be found at: <a href="https://github.com/Phantom5800/livesplit_analyzer" target="_blank">https://github.com/Phantom5800/livesplit_analyzer</a>
                     </li>
                 </ul>
-            </div>
-            <div id="file_upload">
-                Drag and drop your splits onto the page
             </div>
             <footer style="padding-top: 1em; text-align: right;">
                 Speedrun LiveSplit Analyzer &copy; Phantom Games LLC. 2021

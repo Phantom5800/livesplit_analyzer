@@ -779,9 +779,9 @@ function importCsvFromUri(csv) {
 $(document).ready(function() {
     // check for uri information
     getUrlVars();
-    var game = getUrlParam("game", "Game Title");
+    var game = getUrlParam("game", "Drag Splits File Into Page");
     $("#game").html(decodeURIComponent(game));
-    var category = getUrlParam("cat", "Category");
+    var category = getUrlParam("cat", "");
     $("#category").html(decodeURIComponent(category));
     var dataset = getUrlParam("data", "");
     if (dataset.length > 0) {
