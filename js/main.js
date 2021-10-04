@@ -358,7 +358,9 @@ function countAttempts(attemptHistory) {
             totalPlayTime += attemptDataTable[i].duration;
         }
     }
-    $("#total_time").html(convertMsToTimeString(totalPlayTime));
+    var totalTimeStr = convertMsToTimeString(totalPlayTime);
+    totalTimeStr = totalTimeStr.substr(0, totalTimeStr.indexOf('.'));
+    $("#total_time").html(totalTimeStr);
 }
 
 /**
