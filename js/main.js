@@ -278,23 +278,56 @@ function convertMsToTimeString(ms) {
     );
 }
 
+var runsSincePB = 0;
+var completedRunsSincePB = 0;
+
+/**
+ * Count and store data relevant to all attempts at a speedrun.
+ * @param {XMLNode} attemptHistory - AttemptHistory node in the splits xml.
+ */
 function countAttempts(attemptHistory) {
     var completedRuns = 0;
     var markedFirstRun = false;
+    var lastPB = -1; // track the last attempt that was a PB
+    runsSincePB = 0;
+    completedRunsSincePB = 0;
+
     //$("#attempts").html(xmlDoc.getElementsByTagName("AttemptCount")[0].textContent);
     $("#attempts").html(attemptHistory.childElementCount.toLocaleString());
     for (var i = 0; i < attemptHistory.childElementCount; ++i) {
         var attemptData = {};
         var attempt = attemptHistory.children[i];
+
+        // get end times of completed runs
         if (attempt.children && attempt.children.length > 0) {
             var attemptTimeContainer = attempt.getElementsByTagName(TimingMode);
             if (attemptTimeContainer && attemptTimeContainer.length > 0) {
                 attemptData.finishTime = convertSegmentStrToMs(attemptTimeContainer[0].textContent);
+                attemptData.isPB = false;
+
+                if ((lastPB !== -1 && attemptData.finishTime < attemptDataTable[lastPB].finishTime) || lastPB === -1) {
+                    attemptData.isPB = true;
+                    attemptData.runsSincePB = runsSincePB;
+                    attemptData.completedRunsSincePB = completedRunsSincePB;
+                    
+                    lastPB = attemptDataTable.length;
+                    runsSincePB = 0;
+                    completedRunsSincePB = 0;
+                }
+
+                ++completedRuns;
+                if (lastPB !== attemptDataTable.length) {
+                    ++completedRunsSincePB;
+                }
             }
-            // first completed run
-            ++completedRuns;
         }
 
+        // if this is not a PB, update run counter
+        if (lastPB !== attemptDataTable.length) {
+            ++runsSincePB;
+        }
+
+        // grab start and end times for runs for tracking total play times
         try {
             if (attempt.attributes['started'] && attempt.attributes['ended']) {
                 attemptData.startTime = convertStrToDate(attempt.attributes['started'].nodeValue);
@@ -329,6 +362,11 @@ function countAttempts(attemptHistory) {
     $("#total_time").html(convertMsToTimeString(totalPlayTime));
 }
 
+/**
+ * Find the localized date string for when a given time was accomplished.
+ * @param {string} attemptTime 
+ * @returns Localized string for date (ie. MM/DD/YYYY);
+ */
 function findDayOfAttempt(attemptTime) {
     for (var i = 0; i < attemptDataTable.length; ++i) {
         var attempt = attemptDataTable[i];
@@ -542,7 +580,7 @@ function parseSegments(segmentList) {
         table.append(row);
     }
 
-    // fill out final totals
+    // fill out summary final totals
     $("#best_time").html(convertMsToTimeString(totalBestTime));
     $("#average_time").html(convertMsToTimeString(totalAvgTime));
 
@@ -582,6 +620,55 @@ function parseSegments(segmentList) {
 
     correctColumnVisibilities();
     updateTimesave(segmentList.length);
+    fillInPBHistory();
+}
+
+function fillInPBHistory() {
+    var historyTable = document.getElementById("pb_history");
+    for (var i = 0; i < attemptDataTable.length; ++i) {
+        if (attemptDataTable[i].isPB) {
+            var row = document.createElement("tr");
+            row.className = "split";
+
+            var date = document.createElement("td");
+            var time = document.createElement("td");
+            var attempts = document.createElement("td");
+            var completed = document.createElement("td");
+
+            date.innerHTML = attemptDataTable[i].endTime.toLocaleString("en-US", {"dateStyle": "short"});
+            time.innerHTML = convertMsToTimeString(attemptDataTable[i].finishTime);
+            attempts.innerHTML = attemptDataTable[i].runsSincePB;
+            completed.innerHTML = attemptDataTable[i].completedRunsSincePB;
+
+            row.appendChild(date);
+            row.appendChild(time);
+            row.appendChild(attempts);
+            row.appendChild(completed);
+
+            historyTable.appendChild(row);
+        }
+    }
+
+    // manually add one more row for runs since most recent PB
+    var row = document.createElement("tr");
+    row.className = "split";
+
+    var date = document.createElement("td");
+    var time = document.createElement("td");
+    var attempts = document.createElement("td");
+    var completed = document.createElement("td");
+
+    date.innerHTML = "--";
+    time.innerHTML = "--";
+    attempts.innerHTML = runsSincePB;
+    completed.innerHTML = completedRunsSincePB;
+
+    row.appendChild(date);
+    row.appendChild(time);
+    row.appendChild(attempts);
+    row.appendChild(completed);
+
+    historyTable.appendChild(row);
 }
 
 function preventDefaultDrag(event) {
