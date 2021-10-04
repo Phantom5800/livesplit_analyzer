@@ -334,10 +334,9 @@ function countAttempts(attemptHistory) {
                 attemptData.endTime = convertStrToDate(attempt.attributes['ended'].nodeValue);
                 attemptData.duration = attemptData.endTime - attemptData.startTime; // elapsed time in ms
 
-                if (completedRuns === 1 && !markedFirstRun) {
+                if (!markedFirstRun) {
                     markedFirstRun = true;
                     $("#first_date").html(attemptData.endTime.toLocaleString("en-US", {"dateStyle": "short"}));
-                    $("#first_time").html(convertMsToTimeString(attemptData.duration));
 
                     var daysSinceFirstRun = Math.trunc(parseInt(new Date() - attemptData.endTime) / 1000 / 60 / 60 / 24);
                     $("#days_running").html(daysSinceFirstRun.toLocaleString());
@@ -754,7 +753,6 @@ function exportSummaryTable() {
         + $("#total_time").text() + ","
         + $("#completed").text() + ","
         + $("#attempts").text() +","
-        + $("#first_time").text() +","
         + $("#first_date").text() +","
         + $("#days_running").text() +",";
 
@@ -772,9 +770,8 @@ function importSummaryTable(data) {
     $("#total_time").html(segments[6]);
     $("#completed").html(segments[7]);
     $("#attempts").html(segments[8]);
-    $("#first_time").html(segments[9]);
-    $("#first_date").html(segments[10]);
-    $("#days_running").html(segments[11]);
+    $("#first_date").html(segments[9]);
+    $("#days_running").html(segments[10]);
 }
 
 function exportCsv(encode_comma) {
