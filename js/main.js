@@ -8,7 +8,8 @@ const BEST_SEGMENT_TIME_COL = 6;
 const BEST_SEGMENT_DATE_COL = 7;
 const RUNS_ENDED_COL = 8;
 const RUNS_ENDED_BEFORE_COL = 9;
-const COL_CNT = 10;
+const MOST_RECENT_TIME_COL = 10;
+const COL_CNT = 11;
 
 var SmallGapMs = 5000;
 var MediumGapMs = 10000;
@@ -390,9 +391,12 @@ function parseSegments(segmentList) {
     var currentPBTime = 0;
     var currentPBSplitTime = 0;
     var attemptCnt = parseInt($("#attempts").html().replace(/,/g, ""));
+    var mostRecentSegmentDates = [];
     segmentLifetimes.length = attemptCnt;
+    mostRecentSegmentDates.length = attemptCnt;
     for (var i = 0; i < segmentLifetimes.length; ++i) {
         segmentLifetimes[i] = 0;
+        mostRecentSegmentDates[i] = "N/A";
     }
 
     // iterate over all splits
@@ -440,6 +444,12 @@ function parseSegments(segmentList) {
                         bestTimeDate = "Manual or Deleted";
                     }
                 }
+            }
+
+            // last entry, record date
+            if (k === segmentHistory.childElementCount - 1) {
+                var attemptId = parseInt(timeNode.attributes["id"].nodeValue) - 1;
+                mostRecentSegmentDates[i] = attemptDataTable[attemptId].endTime.toLocaleString("en-US", {"dateStyle": "short"});
             }
         }
         currentAvg /= avgCnt;
@@ -574,6 +584,9 @@ function parseSegments(segmentList) {
                 col.id = "resets-" + i;
             } else if (j === RUNS_ENDED_BEFORE_COL) { // resets before or during this split
                 col.id = "resets-before-" + i;
+            } else if (j === MOST_RECENT_TIME_COL) { // most recent date where a run was at this split
+                col.id = "most-recent-" + i;
+                col.innerHTML = mostRecentSegmentDates[i];
             }
             row.appendChild(col);
         }
@@ -898,6 +911,7 @@ $(document).ready(function() {
     $("#medium_gap_time").val(parseInt(localStorageGetWithDefault("medium_gap_time", MediumGapMs))).change();
     $("#large_gap_time").val(parseInt(localStorageGetWithDefault("large_gap_time", LargeGapMs))).change();
 
+    const MOST_RECENT_TIME_COL = 10;
     for (var i = 0; i < COL_CNT; ++i) {
         $("#col-visibility-" + i).prop("checked", localStorageGetWithDefault("col-visibility-" + i, "true") === "true").change();
     }
