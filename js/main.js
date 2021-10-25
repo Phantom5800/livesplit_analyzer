@@ -260,7 +260,7 @@ function convertMsToTimeString(ms) {
     var total_ms = "";
     if (MillisecondAccuracy > 0) {
         milliseconds = ms - total_seconds * 1000 - total_minutes * 60 * 1000 - total_hours * 60 * 60 * 1000 - total_days * 24 * 60 * 60 * 1000;
-        milliseconds = Math.round(milliseconds / Math.pow(10, 3 - MillisecondAccuracy));
+        milliseconds = Math.trunc(milliseconds / Math.pow(10, 3 - MillisecondAccuracy));
         total_ms = ".";
         if (milliseconds < 100 && MillisecondAccuracy > 2) {
             total_ms += "0";
