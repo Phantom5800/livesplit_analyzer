@@ -230,18 +230,29 @@ function convertSegmentStrToMs(str) {
         var seconds = parseInt(results[4]);
         var ms = parseInt(results[5]);
         return ms + seconds * 1000 + minutes * 60 * 1000 + hours * 60 * 60 * 1000;
-    } else {
-        // try without ms just in case time was exact
-        rx = /((.*):(.*):(.*))/g;
-        results = rx.exec(str);
+    } 
 
-        if (results && results.length >= 5) {
-            var hours = parseInt(results[2]);
-            var minutes = parseInt(results[3]);
-            var seconds = parseInt(results[4]);
-            return seconds * 1000 + minutes * 60 * 1000 + hours * 60 * 60 * 1000;
-        }
+    // try without hours and with ms
+    rx = /((.*):(.*)\.(.{0,3}))/g
+    results = rx.exec(str);
+
+    if (results && results.length >= 5) {
+        var minutes = parseInt(results[2]);
+        var seconds = parseInt(results[3]);
+        var ms = parseInt(results[4]);
+        return ms + seconds * 1000 + minutes * 60 * 1000;
     }
+
+    // try without ms just in case time was exact
+    rx = /((.*):(.*):(.*))/g;
+    results = rx.exec(str);
+
+    if (results && results.length >= 5) {
+        var hours = parseInt(results[2]);
+        var minutes = parseInt(results[3]);
+        var seconds = parseInt(results[4]);
+        return seconds * 1000 + minutes * 60 * 1000 + hours * 60 * 60 * 1000;
+    } 
     return 0;
 }
 
@@ -270,10 +281,13 @@ function convertMsToTimeString(ms) {
         }
         total_ms += milliseconds;
     }
+
+    var min_minutes_digits = ((total_hours > 0) ? 2 : 1);
+
     return (
         ((total_days > 0) ? total_days + "d " : "")
-        + ((total_hours > 0 ) ? total_hours + ":" : "")
-        + (total_minutes).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + ":" 
+        + ((total_hours > 0) ? total_hours + ":" : "")
+        + (total_minutes).toLocaleString('en-US', {minimumIntegerDigits: min_minutes_digits, useGrouping:false}) + ":" 
         + (total_seconds).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) 
         + total_ms
     );
