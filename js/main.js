@@ -272,7 +272,7 @@ function convertMsToTimeString(ms) {
     }
     return (
         ((total_days > 0) ? total_days + "d " : "")
-        + total_hours + ":" 
+        + ((total_hours > 0 ) ? total_hours + ":" : "")
         + (total_minutes).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + ":" 
         + (total_seconds).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) 
         + total_ms
