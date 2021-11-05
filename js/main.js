@@ -221,6 +221,12 @@ function convertStrToDate(dateStr) {
 }
 
 function convertSegmentStrToMs(str) {
+    // if time string does not contain milliseconds, add 0 on the end
+    if (!str.includes('.')) {
+        str += ".0";
+    }
+
+    // extract individual times from string
     var rx = /((.*):(.*):(.*)\.(.{0,3}))/g
     var results = rx.exec(str);
 
@@ -232,7 +238,7 @@ function convertSegmentStrToMs(str) {
         return ms + seconds * 1000 + minutes * 60 * 1000 + hours * 60 * 60 * 1000;
     } 
 
-    // try without hours and with ms
+    // try without hours
     rx = /((.*):(.*)\.(.{0,3}))/g
     results = rx.exec(str);
 
@@ -242,17 +248,6 @@ function convertSegmentStrToMs(str) {
         var ms = parseInt(results[4]);
         return ms + seconds * 1000 + minutes * 60 * 1000;
     }
-
-    // try without ms just in case time was exact
-    rx = /((.*):(.*):(.*))/g;
-    results = rx.exec(str);
-
-    if (results && results.length >= 5) {
-        var hours = parseInt(results[2]);
-        var minutes = parseInt(results[3]);
-        var seconds = parseInt(results[4]);
-        return seconds * 1000 + minutes * 60 * 1000 + hours * 60 * 60 * 1000;
-    } 
     return 0;
 }
 
