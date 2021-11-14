@@ -177,7 +177,7 @@ function parseFile(file) {
             // display platform
             if (hasPlatform) {
                 categoryName += platform;
-                if (region) {
+                if (hasRegion) {
                     categoryName += ", ";
                 }
             }
