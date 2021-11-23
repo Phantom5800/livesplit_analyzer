@@ -612,7 +612,9 @@ function parseSegments(segmentList) {
         if (attemptDataTable[i].finishTime) {
             $("#last_finished_time").html(convertMsToTimeString(attemptDataTable[i].finishTime));
             // effectively get only the day from end time
-            var msSinceLastRun = parseInt(new Date() - new Date(attemptDataTable[i].endTime.toLocaleString("en-US", {"dateStyle": "short"})));
+            var lastRun = new Date(attemptDataTable[i].endTime.toLocaleString("en-US", {"dateStyle": "short"}));
+            var msSinceLastRun = parseInt(new Date() - lastRun);
+            $("#last_finished_day").html(lastRun.toLocaleString("en-US", {"dateStyle": "short"}));
             $("#finished_run_days").html(Math.trunc(msSinceLastRun / 1000 / 60 / 60 / 24).toLocaleString());
             break;
         }
@@ -773,6 +775,7 @@ function exportSummaryTable() {
         + $("#average_time").text() + ","
         + $("#best_time").text() + ","
         + $("#last_finished_time").text() + ","
+        + $("#last_finished_day").text() + ","
         + $("#finished_run_days").text() + ","
         + $("#total_time").text() + ","
         + $("#completed").text() + ","
@@ -790,12 +793,13 @@ function importSummaryTable(data) {
     $("#average_time").html(segments[2]);
     $("#best_time").html(segments[3]);
     $("#last_finished_time").html(segments[4]);
-    $("#finished_run_days").html(segments[5]);
-    $("#total_time").html(segments[6]);
-    $("#completed").html(segments[7]);
-    $("#attempts").html(segments[8]);
-    $("#first_date").html(segments[9]);
-    $("#days_running").html(segments[10]);
+    $("#last_finished_day").html(segments[5]);
+    $("#finished_run_days").html(segments[6]);
+    $("#total_time").html(segments[7]);
+    $("#completed").html(segments[8]);
+    $("#attempts").html(segments[9]);
+    $("#first_date").html(segments[10]);
+    $("#days_running").html(segments[11]);
 }
 
 function exportCsv(encode_comma) {

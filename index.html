@@ -5,6 +5,15 @@
         <script src="js/libs/lz-string/lz-string.js"></script>
         <script src="js/main.js"></script>
         <link rel="stylesheet" href="styles/main.css">
+
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-J8YYL6MGDQ"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-J8YYL6MGDQ');
+        </script>
     </head>
     <body ondrop="analyzeSplits(event)" ondragover="preventDefaultDrag(event)">
         <div id="content">
@@ -47,6 +56,10 @@
                         <tr>
                             <td class="header">Latest Time</td>
                             <td id="last_finished_time"></td>
+                        </tr>
+                        <tr>
+                            <td class="header">Latest Run Date</td>
+                            <td id="last_finished_day"></td>
                         </tr>
                         <tr>
                             <td class="header">Days Since Finished Run</td>
