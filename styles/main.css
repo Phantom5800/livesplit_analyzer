@@ -50,6 +50,29 @@ table, tr, td {
     border: 3px solid black;
 }
 
+table.title, tr.title, td.title {
+    border: none;
+    background-color: inherit;
+}
+
+table.title {
+    width: 100%;
+}
+
+td.title {
+    width: 85%;
+    text-align: left;
+}
+
+img#box_art {
+    width: 75%;
+}
+
+td.box_art {
+    width: 15%;
+    text-align: center;
+}
+
 tr {
     background-color: rgb(25,25,25);
 }

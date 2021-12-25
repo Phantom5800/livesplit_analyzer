@@ -146,6 +146,7 @@ function parseFile(file) {
 
         // game title
         $("#game").html(xmlDoc.getElementsByTagName("GameName"));
+        setBoxArt();
 
         // build category
         var categoryName = xmlDoc.getElementsByTagName("CategoryName")[0].textContent;
@@ -887,12 +888,31 @@ function importCsvFromUri(csv) {
     $("#pb_time").html($(".col-" + PB_SPLIT_TIME_COL + ":last").html());
 }
 
+function setBoxArt() {
+    var game_name = $("#game").text();
+
+    const callSrcApi = async () => {
+        const response = await fetch("https://www.speedrun.com/api/v1/games?name=" + encodeURIComponent(game_name));
+        const json = await response.json();
+
+        if (json["data"] && json["data"][0] && json["data"][0]["assets"]) {
+            const img_uri = json["data"][0]["assets"]["cover-medium"];
+            $("#box_art").attr('src', img_uri["uri"]);
+        }
+    }
+
+    if (game_name.length > 0) {
+        callSrcApi();
+    }
+}
+
 // load local storage settings on page load if they exist
 $(document).ready(function() {
     // check for uri information
     getUrlVars();
     var game = getUrlParam("game", "Drag Splits File Into Page");
     $("#game").html(decodeURIComponent(game));
+    setBoxArt();
     var category = getUrlParam("cat", "");
     $("#category").html(decodeURIComponent(category));
     var dataset = getUrlParam("data", "");
