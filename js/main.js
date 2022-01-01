@@ -908,6 +908,9 @@ function setBoxArt() {
 
 // load local storage settings on page load if they exist
 $(document).ready(function() {
+    // disable dragging of images within the page
+    $('img').on('dragstart', false);
+
     // check for uri information
     getUrlVars();
     var game = getUrlParam("game", "Drag Splits File Into Page");
