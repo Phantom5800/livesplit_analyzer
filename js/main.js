@@ -372,6 +372,17 @@ function countAttempts(attemptHistory) {
     var totalTimeStr = convertMsToTimeString(totalPlayTime);
     totalTimeStr = totalTimeStr.substr(0, totalTimeStr.indexOf('.'));
     $("#total_time").html(totalTimeStr);
+
+    // fill in data for when the last attempt was
+    if (attemptDataTable.length > 0) {
+        var lastAttempt = attemptDataTable[attemptDataTable.length - 1];
+        if (lastAttempt) {
+            var msSinceLastRun = parseInt(new Date() - lastAttempt.startTime);
+            $("#last_attempt_date").text(lastAttempt.startTime.toLocaleString("en-US", {"dateStyle": "short"}));
+            $("#last_attempt_days").html(Math.trunc(msSinceLastRun / 1000 / 60 / 60 / 24).toLocaleString());
+        }
+    }
+
 }
 
 /**
@@ -780,9 +791,11 @@ function exportSummaryTable() {
         + $("#finished_run_days").text() + ","
         + $("#total_time").text() + ","
         + $("#completed").text() + ","
-        + $("#attempts").text() +","
-        + $("#first_date").text() +","
-        + $("#days_running").text() +",";
+        + $("#attempts").text() + ","
+        + $("#first_date").text() + ","
+        + $("#days_running").text() + ","
+        + $("#last_attempt_date").text() + ","
+        + $("#last_attempt_days").text();
 
     return summary;
 }
@@ -801,6 +814,8 @@ function importSummaryTable(data) {
     $("#attempts").html(segments[9]);
     $("#first_date").html(segments[10]);
     $("#days_running").html(segments[11]);
+    $("#last_attempt_date").html(segments[12]);
+    $("#last_attempt_days").html(segments[13]);
 }
 
 function exportCsv(encode_comma) {
