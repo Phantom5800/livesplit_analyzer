@@ -470,7 +470,9 @@ function parseSegments(segmentList) {
             // last entry, record date
             if (k === segmentHistory.childElementCount - 1) {
                 var attemptId = parseInt(timeNode.attributes["id"].nodeValue) - 1;
-                mostRecentSegmentDates[i] = attemptDataTable[attemptId].endTime.toLocaleString("en-US", {"dateStyle": "short"});
+                if (attemptDataTable[attemptId]) {
+                    mostRecentSegmentDates[i] = attemptDataTable[attemptId].endTime.toLocaleString("en-US", {"dateStyle": "short"});
+                }
             }
         }
         currentAvg /= avgCnt;
