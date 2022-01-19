@@ -21,7 +21,7 @@ h3 {
 }
 
 footer {
-    font-size: 0.6em;
+    font-size: 0.8em;
     padding-bottom: 2em;
 }
 
@@ -134,4 +134,13 @@ button {
 
     color: white;
     font-weight: bold;
+}
+
+a {
+    text-decoration: none;
+    color: lightblue;
+}
+
+a:hover {
+    text-decoration: underline;
 }
