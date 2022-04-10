@@ -464,8 +464,6 @@ function parseSegments(segmentList) {
                     var attemptId = parseInt(timeNode.attributes["id"].nodeValue) - 1;
                     if (attemptId >= 0) {
                         bestTimeDate = attemptDataTable[attemptId].endTime.toLocaleString("en-US", {"dateStyle": "short"});
-                    } else {
-                        bestTimeDate = "Manual or Deleted";
                     }
                 }
             }
@@ -607,7 +605,7 @@ function parseSegments(segmentList) {
                 col.id = "best-segment-" + i;
                 col.innerHTML = convertMsToTimeString(convertSegmentStrToMs(bestTime));
             } else if (j === BEST_SEGMENT_DATE_COL) { // best segment time date
-                col.innerHTML = bestTimeDate;
+                col.innerHTML = bestTimeDate ?? "Manual or Deleted";
             } else if (j === RUNS_ENDED_COL) { // resets during this split
                 col.id = "resets-" + i;
             } else if (j === RUNS_ENDED_BEFORE_COL) { // resets before or during this split
