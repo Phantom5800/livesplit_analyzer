@@ -436,9 +436,11 @@ function parseSegments(segmentList) {
         var bestTimeDate = undefined;
         var currentAvg = 0;
         var avgCnt = 0;
+        const weight_modifier = 0.75;
+        var current_weight = 1.0;
         var ignoredIds = []; // track the attempts that were skipped when averaging times
         // iterate over all attempts of current split
-        for (var k = 0; k < segmentHistory.childElementCount; ++k) {
+        for (var k = segmentHistory.childElementCount - 1; k >= 0 ; --k) {
             var timeNode = segmentHistory.children[k]; // time information about segment attempt
             var timeNodeId = parseInt(timeNode.attributes["id"].nodeValue) - 1; // attemptId for this segment time
             
@@ -450,8 +452,9 @@ function parseSegments(segmentList) {
                 var segmentTimeContainer = timeNode.getElementsByTagName(TimingMode); // get GameTime vs RealTime
                 var segmentTime = (segmentTimeContainer && segmentTimeContainer.length > 0) ? segmentTimeContainer[0].textContent.trim() : "00:00:00.000";
                 if (hasPreviousSegment) { // only include a time if the previous segment was not skipped
-                    currentAvg += convertSegmentStrToMs(segmentTime);
-                    ++avgCnt;
+                    currentAvg += current_weight * convertSegmentStrToMs(segmentTime);
+                    avgCnt += current_weight;
+                    current_weight *= weight_modifier;
                 } else {
                     ignoredIds.push(k);
                 }
@@ -481,7 +484,8 @@ function parseSegments(segmentList) {
             var oldAvg = currentAvg;
             currentAvg = 0;
             avgCnt = 0;
-            for (var k = 0; k < segmentHistory.childElementCount; ++k) {
+            current_weight = 1.0;
+            for (var k = segmentHistory.childElementCount - 1; k >= 0 ; --k) {
                 var timeNode = segmentHistory.children[k];
                 var timeNodeId = parseInt(timeNode.attributes["id"].nodeValue) - 1;
     
@@ -490,8 +494,9 @@ function parseSegments(segmentList) {
                     var segmentTime = (segmentTimeContainer && segmentTimeContainer.length > 0) ? segmentTimeContainer[0].textContent.trim() : "00:00:00.000";
                     var time = convertSegmentStrToMs(segmentTime);
                     if (time < oldAvg * SplitOutlierThreshold && !ignoredIds.includes(k)) {
-                        currentAvg += time;
-                        ++avgCnt;
+                        currentAvg += current_weight * time;
+                        avgCnt += current_weight;
+                        current_weight *= weight_modifier;
                     }
                 }
             }

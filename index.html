@@ -6,8 +6,8 @@
         <meta name="author" content="Phantom Games LLC.">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
         <script src="js/libs/lz-string/lz-string.js"></script>
-        <script src="js/main.js"></script>
-        <link rel="stylesheet" href="styles/main.css">
+        <script src="js/main.js?version=3"></script>
+        <link rel="stylesheet" href="styles/main.css?version=1">
 
         <!-- Global site tag (gtag.js) - Google Analytics -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-J8YYL6MGDQ"></script>
@@ -285,7 +285,7 @@
             <div class="info" style="padding-top: 1em; padding-bottom: 1em;">
                 <ul>
                     <li>
-                        Average times are calculated as a mean average of all available times for a split.
+                        Average times are calculated as a weighted average favoring more recent splits, algorithm based on LiveSplit's calculation.
                     </li>
                     <li>
                         Best Segment Time Date being undefined likely means that the a best segment time was deleted in livesplit and a new one has not been set since.
