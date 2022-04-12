@@ -21,8 +21,15 @@ var RemoveOutliers = false;
 const SplitOutlierThreshold = 2; // exclude times greater than avg * this value when RemoveOutliers is enabled
 var AllSplitsSelected = false;
 
+var activeTimers = {};
+
 function analyzeSplits(event) {
     console.log("file dropped");
+
+    for (timer in activeTimers) {
+        clearTimeout(activeTimers[timer]);
+    }
+    activeTimers = {};
 
     if (event.dataTransfer.items) {
         for (var i = 0; i < event.dataTransfer.items.length; ++i) {
@@ -375,14 +382,24 @@ function countAttempts(attemptHistory) {
 
     // fill in data for when the last attempt was
     if (attemptDataTable.length > 0) {
-        var lastAttempt = attemptDataTable[attemptDataTable.length - 1];
-        if (lastAttempt) {
-            var msSinceLastRun = parseInt(new Date() - lastAttempt.startTime);
-            $("#last_attempt_date").text(lastAttempt.startTime.toLocaleString("en-US", {"dateStyle": "short"}));
-            $("#last_attempt_days").html(Math.trunc(msSinceLastRun / 1000 / 60 / 60 / 24).toLocaleString());
+        function setLastAttempt() {
+            var lastAttempt = attemptDataTable[attemptDataTable.length - 1];
+            if (lastAttempt) {
+                var dayOfAttempt = lastAttempt.startTime;
+                dayOfAttempt.setHours(0);
+                dayOfAttempt.setMinutes(0);
+                dayOfAttempt.setSeconds(0);
+                dayOfAttempt.setMilliseconds(0);
+                var msSinceLastRun = parseInt(new Date() - new Date(dayOfAttempt));
+                $("#last_attempt_date").text(lastAttempt.startTime.toLocaleString("en-US", {"dateStyle": "short"}));
+                $("#last_attempt_days").html(Math.trunc(msSinceLastRun / 1000 / 60 / 60 / 24).toLocaleString());
+            }
+            activeTimers["lastattempt"] = setTimeout(setLastAttempt, 1000 * 60 * 60);
         }
-    }
 
+        setLastAttempt();
+        activeTimers["lastattempt"] = setTimeout(setLastAttempt, 1000 * 60 * 60);
+    }
 }
 
 /**
@@ -559,13 +576,20 @@ function parseSegments(segmentList) {
                             // final split time
                             if (i === segmentList.length - 1) {
                                 $("#pb_time").html(col.innerHTML);
-                                // find pb date
-                                var dayOfPB = findDayOfAttempt(fullTime);
-                                $("#pb_date").html(dayOfPB);
-    
-                                // convert from ms->days
-                                var daysSincePB = Math.trunc(parseInt(new Date() - new Date(dayOfPB)) / 1000 / 60 / 60 / 24);
-                                $("#pb_offset").html(daysSincePB.toLocaleString());
+
+                                function setTime() {
+                                    // find pb date
+                                    var dayOfPB = findDayOfAttempt(fullTime);
+                                    $("#pb_date").html(dayOfPB);
+        
+                                    // convert from ms->days
+                                    var daysSincePB = Math.trunc(parseInt(new Date() - new Date(dayOfPB)) / 1000 / 60 / 60 / 24);
+                                    $("#pb_offset").html(daysSincePB.toLocaleString());
+                                    activeTimers["pb_offset"] = setTimeout(setTime, 1000 * 60 * 60);
+                                }
+
+                                setTime();
+                                activeTimers["pb_offset"] = setTimeout(setTime, 1000 * 60 * 60);
                             }
                         }
                     }
@@ -628,11 +652,19 @@ function parseSegments(segmentList) {
     for (var i = attemptDataTable.length - 1; i >= 0; --i) {
         if (attemptDataTable[i].finishTime) {
             $("#last_finished_time").html(convertMsToTimeString(attemptDataTable[i].finishTime));
-            // effectively get only the day from end time
-            var lastRun = new Date(attemptDataTable[i].endTime.toLocaleString("en-US", {"dateStyle": "short"}));
-            var msSinceLastRun = parseInt(new Date() - lastRun);
-            $("#last_finished_day").html(lastRun.toLocaleString("en-US", {"dateStyle": "short"}));
-            $("#finished_run_days").html(Math.trunc(msSinceLastRun / 1000 / 60 / 60 / 24).toLocaleString());
+
+            function setlastday() {
+                // effectively get only the day from end time
+                var lastRun = new Date(attemptDataTable[i].endTime.toLocaleString("en-US", {"dateStyle": "short"}));
+                var msSinceLastRun = parseInt(new Date() - lastRun);
+                $("#last_finished_day").html(lastRun.toLocaleString("en-US", {"dateStyle": "short"}));
+                $("#finished_run_days").html(Math.trunc(msSinceLastRun / 1000 / 60 / 60 / 24).toLocaleString());
+
+                activeTimers["lastfinishedday"] = setTimeout(setlastday, 1000 * 60 * 60);
+            }
+
+            setlastday();
+            activeTimers["lastfinishedday"] = setTimeout(setlastday, 1000 * 60 * 60);
             break;
         }
     }
