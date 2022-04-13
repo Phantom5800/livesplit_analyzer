@@ -394,11 +394,11 @@ function countAttempts(attemptHistory) {
                 $("#last_attempt_date").text(lastAttempt.startTime.toLocaleString("en-US", {"dateStyle": "short"}));
                 $("#last_attempt_days").html(Math.trunc(msSinceLastRun / 1000 / 60 / 60 / 24).toLocaleString());
             }
-            activeTimers["lastattempt"] = setTimeout(setLastAttempt, 1000 * 60 * 60);
+            //activeTimers["lastattempt"] = setTimeout(setLastAttempt, 1000 * 60 * 60);
         }
 
         setLastAttempt();
-        activeTimers["lastattempt"] = setTimeout(setLastAttempt, 1000 * 60 * 60);
+        //activeTimers["lastattempt"] = setTimeout(setLastAttempt, 1000 * 60 * 60);
     }
 }
 
@@ -585,11 +585,11 @@ function parseSegments(segmentList) {
                                     // convert from ms->days
                                     var daysSincePB = Math.trunc(parseInt(new Date() - new Date(dayOfPB)) / 1000 / 60 / 60 / 24);
                                     $("#pb_offset").html(daysSincePB.toLocaleString());
-                                    activeTimers["pb_offset"] = setTimeout(setTime, 1000 * 60 * 60);
+                                    //activeTimers["pb_offset"] = setTimeout(setTime, 1000 * 60 * 60);
                                 }
 
                                 setTime();
-                                activeTimers["pb_offset"] = setTimeout(setTime, 1000 * 60 * 60);
+                                //activeTimers["pb_offset"] = setTimeout(setTime, 1000 * 60 * 60);
                             }
                         }
                     }
@@ -660,11 +660,11 @@ function parseSegments(segmentList) {
                 $("#last_finished_day").html(lastRun.toLocaleString("en-US", {"dateStyle": "short"}));
                 $("#finished_run_days").html(Math.trunc(msSinceLastRun / 1000 / 60 / 60 / 24).toLocaleString());
 
-                activeTimers["lastfinishedday"] = setTimeout(setlastday, 1000 * 60 * 60);
+                //activeTimers["lastfinishedday"] = setTimeout(setlastday, 1000 * 60 * 60);
             }
 
             setlastday();
-            activeTimers["lastfinishedday"] = setTimeout(setlastday, 1000 * 60 * 60);
+            //activeTimers["lastfinishedday"] = setTimeout(setlastday, 1000 * 60 * 60);
             break;
         }
     }
