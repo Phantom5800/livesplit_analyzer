@@ -138,6 +138,7 @@ function correctColumnVisibilities() {
 
 var attemptDataTable = [];
 var segmentLifetimes = [[]];
+var attemptIdOffset = 0;
 
 function parseFile(file) {
     // clear out any previous data
@@ -299,6 +300,11 @@ function convertMsToTimeString(ms) {
 var runsSincePB = 0;
 var completedRunsSincePB = 0;
 
+Date.prototype.isValid = function() {
+    // invalid date returns NaN, NaN != NaN
+    return this.getTime() === this.getTime();
+}
+
 /**
  * Count and store data relevant to all attempts at a speedrun.
  * @param {XMLNode} attemptHistory - AttemptHistory node in the splits xml.
@@ -310,62 +316,69 @@ function countAttempts(attemptHistory) {
     runsSincePB = 0;
     completedRunsSincePB = 0;
 
-    //$("#attempts").html(xmlDoc.getElementsByTagName("AttemptCount")[0].textContent);
-    $("#attempts").html(attemptHistory.childElementCount.toLocaleString());
+    var start_date_filter = new Date($("#start_date").val());
     for (var i = 0; i < attemptHistory.childElementCount; ++i) {
         var attemptData = {};
         var attempt = attemptHistory.children[i];
 
-        // get end times of completed runs
-        if (attempt.children && attempt.children.length > 0) {
-            var attemptTimeContainer = attempt.getElementsByTagName(TimingMode);
-            if (attemptTimeContainer && attemptTimeContainer.length > 0) {
-                attemptData.finishTime = convertSegmentStrToMs(attemptTimeContainer[0].textContent);
-                attemptData.isPB = false;
+        var start_date = new Date(attempt.attributes['started'].nodeValue);
+        if (!start_date_filter.isValid() || start_date >= start_date_filter) {
+            // get end times of completed runs
+            if (attempt.children && attempt.children.length > 0) {
+                var attemptTimeContainer = attempt.getElementsByTagName(TimingMode);
+                if (attemptTimeContainer && attemptTimeContainer.length > 0) {
+                    attemptData.finishTime = convertSegmentStrToMs(attemptTimeContainer[0].textContent);
+                    attemptData.isPB = false;
 
-                if ((lastPB !== -1 && attemptData.finishTime < attemptDataTable[lastPB].finishTime) || lastPB === -1) {
-                    attemptData.isPB = true;
-                    attemptData.runsSincePB = runsSincePB;
-                    attemptData.completedRunsSincePB = completedRunsSincePB;
-                    
-                    lastPB = attemptDataTable.length;
-                    runsSincePB = 0;
-                    completedRunsSincePB = 0;
-                }
+                    if ((lastPB !== -1 && attemptData.finishTime < attemptDataTable[lastPB].finishTime) || lastPB === -1) {
+                        attemptData.isPB = true;
+                        attemptData.runsSincePB = runsSincePB;
+                        attemptData.completedRunsSincePB = completedRunsSincePB;
+                        
+                        lastPB = attemptDataTable.length;
+                        runsSincePB = 0;
+                        completedRunsSincePB = 0;
+                    }
 
-                ++completedRuns;
-                if (lastPB !== attemptDataTable.length) {
-                    ++completedRunsSincePB;
-                }
-            }
-        }
-
-        // if this is not a PB, update run counter
-        if (lastPB !== attemptDataTable.length) {
-            ++runsSincePB;
-        }
-
-        // grab start and end times for runs for tracking total play times
-        try {
-            if (attempt.attributes['started'] && attempt.attributes['ended']) {
-                attemptData.startTime = convertStrToDate(attempt.attributes['started'].nodeValue);
-                attemptData.endTime = convertStrToDate(attempt.attributes['ended'].nodeValue);
-                attemptData.duration = attemptData.endTime - attemptData.startTime; // elapsed time in ms
-
-                if (!markedFirstRun) {
-                    markedFirstRun = true;
-                    $("#first_date").html(attemptData.endTime.toLocaleString("en-US", {"dateStyle": "short"}));
-
-                    var daysSinceFirstRun = Math.trunc(parseInt(new Date() - attemptData.endTime) / 1000 / 60 / 60 / 24);
-                    $("#days_running").html(daysSinceFirstRun.toLocaleString());
+                    ++completedRuns;
+                    if (lastPB !== attemptDataTable.length) {
+                        ++completedRunsSincePB;
+                    }
                 }
             }
-        } catch(error) {
-            console.log(error);
+
+            // if this is not a PB, update run counter
+            if (lastPB !== attemptDataTable.length) {
+                ++runsSincePB;
+            }
+
+            // grab start and end times for runs for tracking total play times
+            try {
+                if (attempt.attributes['started'] && attempt.attributes['ended']) {
+                    attemptData.startTime = convertStrToDate(attempt.attributes['started'].nodeValue);
+                    attemptData.endTime = convertStrToDate(attempt.attributes['ended'].nodeValue);
+                    attemptData.duration = attemptData.endTime - attemptData.startTime; // elapsed time in ms
+
+                    if (!markedFirstRun) {
+                        markedFirstRun = true;
+                        $("#first_date").html(attemptData.endTime.toLocaleString("en-US", {"dateStyle": "short"}));
+
+                        var daysSinceFirstRun = Math.trunc(parseInt(new Date() - attemptData.endTime) / 1000 / 60 / 60 / 24);
+                        $("#days_running").html(daysSinceFirstRun.toLocaleString());
+                    }
+                }
+            } catch(error) {
+                console.log(error);
+            }
+
+            attemptDataTable.push(attemptData);
+            if (attemptDataTable.length === 1) {
+                attemptIdOffset = parseInt(attempt.attributes['id'].nodeValue) - 1;
+            }
         }
-        attemptDataTable.push(attemptData);
     }
-    var attemptCount = parseInt($("#attempts").html().replace(/,/g, ""));
+    var attemptCount = attemptDataTable.length;
+    $("#attempts").html(attemptCount);
     var completedPercent = Math.trunc(completedRuns / attemptCount * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy);
     $("#completed").html(completedRuns.toLocaleString() + " (" + completedPercent + "%)");
 
@@ -461,38 +474,42 @@ function parseSegments(segmentList) {
             var timeNode = segmentHistory.children[k]; // time information about segment attempt
             var timeNodeId = parseInt(timeNode.attributes["id"].nodeValue) - 1; // attemptId for this segment time
             
-            if (timeNode.children && timeNode.children.length > 0) {
-                // update latest segment a run has been seen at
-                var hasPreviousSegment = segmentLifetimes[timeNodeId] === i; // check if the current attempt skipped the previous split
-                segmentLifetimes[timeNodeId] = i + 1; // treat 0 as having not finished a split, so offset by 1 for each completed split
-
-                var segmentTimeContainer = timeNode.getElementsByTagName(TimingMode); // get GameTime vs RealTime
-                var segmentTime = (segmentTimeContainer && segmentTimeContainer.length > 0) ? segmentTimeContainer[0].textContent.trim() : "00:00:00.000";
-                if (hasPreviousSegment) { // only include a time if the previous segment was not skipped
-                    currentAvg += current_weight * convertSegmentStrToMs(segmentTime);
-                    avgCnt += current_weight;
-                    current_weight *= weight_modifier;
-                } else {
-                    ignoredIds.push(k);
+            // only average times during the date range we care about
+            if (timeNodeId - attemptIdOffset >= 0) {
+                if (timeNode.children && timeNode.children.length > 0) {
+                    // update latest segment a run has been seen at
+                    var hasPreviousSegment = segmentLifetimes[timeNodeId - attemptIdOffset] === i; // check if the current attempt skipped the previous split
+                    segmentLifetimes[timeNodeId - attemptIdOffset] = i + 1; // treat 0 as having not finished a split, so offset by 1 for each completed split
+    
+                    var segmentTimeContainer = timeNode.getElementsByTagName(TimingMode); // get GameTime vs RealTime
+                    var segmentTime = (segmentTimeContainer && segmentTimeContainer.length > 0) ? segmentTimeContainer[0].textContent.trim() : "00:00:00.000";
+                    if (hasPreviousSegment) { // only include a time if the previous segment was not skipped
+                        currentAvg += current_weight * convertSegmentStrToMs(segmentTime);
+                        avgCnt += current_weight;
+                        current_weight *= weight_modifier;
+                    } else {
+                        ignoredIds.push(k);
+                    }
+    
+                    // found date best time was recorded
+                    if (segmentTime === bestTime) {
+                        var attemptId = parseInt(timeNode.attributes["id"].nodeValue) - 1;
+                        if (attemptId - attemptIdOffset >= 0) {
+                            bestTimeDate = attemptDataTable[attemptId - attemptIdOffset].endTime.toLocaleString("en-US", {"dateStyle": "short"});
+                        }
+                    }
                 }
-
-                // found date best time was recorded
-                if (segmentTime === bestTime) {
+    
+                // last entry, record date
+                if (k === segmentHistory.childElementCount - 1) {
                     var attemptId = parseInt(timeNode.attributes["id"].nodeValue) - 1;
-                    if (attemptId >= 0) {
-                        bestTimeDate = attemptDataTable[attemptId].endTime.toLocaleString("en-US", {"dateStyle": "short"});
+                    if (attemptDataTable[attemptId - attemptIdOffset]) {
+                        mostRecentSegmentDates[i] = attemptDataTable[attemptId - attemptIdOffset].endTime.toLocaleString("en-US", {"dateStyle": "short"});
                     }
                 }
             }
-
-            // last entry, record date
-            if (k === segmentHistory.childElementCount - 1) {
-                var attemptId = parseInt(timeNode.attributes["id"].nodeValue) - 1;
-                if (attemptDataTable[attemptId]) {
-                    mostRecentSegmentDates[i] = attemptDataTable[attemptId].endTime.toLocaleString("en-US", {"dateStyle": "short"});
-                }
-            }
         }
+        console.log(avgCnt);
         currentAvg /= avgCnt;
         // remove any times from average that are more than double the previous calculated average
         if (RemoveOutliers) {
@@ -504,14 +521,16 @@ function parseSegments(segmentList) {
                 var timeNode = segmentHistory.children[k];
                 var timeNodeId = parseInt(timeNode.attributes["id"].nodeValue) - 1;
     
-                if (timeNode.children && timeNode.children.length > 0) {
-                    var segmentTimeContainer = timeNode.getElementsByTagName(TimingMode);
-                    var segmentTime = (segmentTimeContainer && segmentTimeContainer.length > 0) ? segmentTimeContainer[0].textContent.trim() : "00:00:00.000";
-                    var time = convertSegmentStrToMs(segmentTime);
-                    if (time < oldAvg * SplitOutlierThreshold && !ignoredIds.includes(k)) {
-                        currentAvg += current_weight * time;
-                        avgCnt += current_weight;
-                        current_weight *= weight_modifier;
+                if (timeNodeId - attemptIdOffset >= 0) {
+                    if (timeNode.children && timeNode.children.length > 0) {
+                        var segmentTimeContainer = timeNode.getElementsByTagName(TimingMode);
+                        var segmentTime = (segmentTimeContainer && segmentTimeContainer.length > 0) ? segmentTimeContainer[0].textContent.trim() : "00:00:00.000";
+                        var time = convertSegmentStrToMs(segmentTime);
+                        if (time < oldAvg * SplitOutlierThreshold && !ignoredIds.includes(k)) {
+                            currentAvg += current_weight * time;
+                            avgCnt += current_weight;
+                            current_weight *= weight_modifier;
+                        }
                     }
                 }
             }
@@ -684,11 +703,11 @@ function parseSegments(segmentList) {
         var count = runsDeadAtSegment[i];
         if (count > 0) {
             var percentage = Math.round(count / attemptCnt * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy)
-            $("#resets-" + i).html(count.toLocaleString() + " (" + percentage + "%)");
+            $("#resets-" + i).html(`${count} (${percentage}%)`);
             
             totalDeaths += count;
             var totalPercentage = Math.round(totalDeaths / attemptCnt * 100 * Math.pow(10, PercentageAccuracy)) / Math.pow(10, PercentageAccuracy);
-            $("#resets-before-" + i).html(totalDeaths.toLocaleString() + " (" + totalPercentage + "%)");
+            $("#resets-before-" + i).html(`${totalDeaths} (${totalPercentage}%)`);
         }
     }
 
