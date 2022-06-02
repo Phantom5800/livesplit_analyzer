@@ -317,11 +317,15 @@ function countAttempts(attemptHistory) {
     completedRunsSincePB = 0;
 
     var start_date_filter = new Date($("#start_date").val());
+    var end_date_filter = new Date($("#end_date").val());
     for (var i = 0; i < attemptHistory.childElementCount; ++i) {
         var attemptData = {};
         var attempt = attemptHistory.children[i];
 
         var start_date = new Date(attempt.attributes['started'].nodeValue);
+        if (end_date_filter.isValid() && start_date > end_date_filter) {
+            break;
+        }
         if (!start_date_filter.isValid() || start_date >= start_date_filter) {
             // get end times of completed runs
             if (attempt.children && attempt.children.length > 0) {
@@ -469,8 +473,9 @@ function parseSegments(segmentList) {
         const weight_modifier = 0.75;
         var current_weight = 1.0;
         var ignoredIds = []; // track the attempts that were skipped when averaging times
+        var adjustSegmentHistoryLength = segmentHistory.childElementCount - 1;
         // iterate over all attempts of current split
-        for (var k = segmentHistory.childElementCount - 1; k >= 0 ; --k) {
+        for (var k = adjustSegmentHistoryLength; k >= 0 ; --k) {
             var timeNode = segmentHistory.children[k]; // time information about segment attempt
             var timeNodeId = parseInt(timeNode.attributes["id"].nodeValue) - 1; // attemptId for this segment time
             
@@ -494,14 +499,14 @@ function parseSegments(segmentList) {
                     // found date best time was recorded
                     if (segmentTime === bestTime) {
                         var attemptId = parseInt(timeNode.attributes["id"].nodeValue) - 1;
-                        if (attemptId - attemptIdOffset >= 0) {
+                        if (attemptId - attemptIdOffset >= 0 && attemptId - attemptIdOffset < attemptDataTable.length) {
                             bestTimeDate = attemptDataTable[attemptId - attemptIdOffset].endTime.toLocaleString("en-US", {"dateStyle": "short"});
                         }
                     }
                 }
     
                 // last entry, record date
-                if (k === segmentHistory.childElementCount - 1) {
+                if (k === adjustSegmentHistoryLength) {
                     var attemptId = parseInt(timeNode.attributes["id"].nodeValue) - 1;
                     if (attemptDataTable[attemptId - attemptIdOffset]) {
                         mostRecentSegmentDates[i] = attemptDataTable[attemptId - attemptIdOffset].endTime.toLocaleString("en-US", {"dateStyle": "short"});
@@ -517,7 +522,7 @@ function parseSegments(segmentList) {
             currentAvg = 0;
             avgCnt = 0;
             current_weight = 1.0;
-            for (var k = segmentHistory.childElementCount - 1; k >= 0 ; --k) {
+            for (var k = adjustSegmentHistoryLength; k >= 0 ; --k) {
                 var timeNode = segmentHistory.children[k];
                 var timeNodeId = parseInt(timeNode.attributes["id"].nodeValue) - 1;
     
