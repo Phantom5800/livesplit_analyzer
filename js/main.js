@@ -595,11 +595,24 @@ function parseSegments(segmentList) {
                             var fullTime = (fullTimeContainer && fullTimeContainer.length > 0) ? fullTimeContainer[0].textContent : "00:00:00.000";
                             currentPBTime = currentPBSplitTime;
                             currentPBSplitTime = convertSegmentStrToMs(fullTime);
-                            col.innerHTML = convertMsToTimeString(convertSegmentStrToMs(fullTime));
+                            col.innerHTML = convertMsToTimeString(currentPBSplitTime);
     
                             // final split time
                             if (i === segmentList.length - 1) {
                                 $("#pb_time").html(col.innerHTML);
+
+                                // count runs within 1 minute
+                                const oneMinuteInMs = 1000 * 60;
+                                var attemptsWithinMinute = 0;
+                                for (var attempt in attemptDataTable) {
+                                    if (attemptDataTable[attempt].finishTime) {
+                                        var timeDiff = Math.abs(attemptDataTable[attempt].finishTime - currentPBSplitTime);
+                                        if (timeDiff != 0 && timeDiff <= oneMinuteInMs) {
+                                            ++attemptsWithinMinute;
+                                        }
+                                    }
+                                }
+                                $("#one_minute").text(attemptsWithinMinute);
 
                                 function setTime() {
                                     // find pb date
@@ -853,6 +866,7 @@ function exportSummaryTable() {
         + $("#total_time").text() + ","
         + $("#completed").text() + ","
         + $("#attempts").text() + ","
+        + $("#one_minute").text() + ","
         + $("#first_date").text() + ","
         + $("#days_running").text() + ","
         + $("#last_attempt_date").text() + ","
@@ -873,10 +887,11 @@ function importSummaryTable(data) {
     $("#total_time").html(segments[7]);
     $("#completed").html(segments[8]);
     $("#attempts").html(segments[9]);
-    $("#first_date").html(segments[10]);
-    $("#days_running").html(segments[11]);
-    $("#last_attempt_date").html(segments[12]);
-    $("#last_attempt_days").html(segments[13]);
+    $("#one_minute").html(segments[10])
+    $("#first_date").html(segments[11]);
+    $("#days_running").html(segments[12]);
+    $("#last_attempt_date").html(segments[13]);
+    $("#last_attempt_days").html(segments[14]);
 }
 
 function exportCsv(encode_comma) {
